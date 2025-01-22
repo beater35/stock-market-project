@@ -24,24 +24,21 @@ def calculate_sebon_fee(transaction_amount):
 		return transaction_amount * 0.001 # 0.10% for transactions above Rs. 5,000,000
 	
 
-def calculate_capital_gain_tax(profit_or_loss, user_type, purchase_date, sell_date):
+def calculate_capital_gain_tax(profit, user_type, short_term_profit=0, long_term_profit=0):
     """Calculate capital gain tax based on user type and holding period (short/long term)."""
-    if profit_or_loss <= 0:
+    if profit <= 0:
         return 0  # No tax on losses
-
-    # Calculate the holding period (in days)
-    holding_period = (sell_date - purchase_date).days
 
     # Institutional investors pay a flat 10% tax on profit
     if user_type == 'institutional':
-        return profit_or_loss * 0.10  # 10% tax rate for institutional investors
+        return profit * 0.10  # 10% tax rate for institutional investors
 
     # Individual investors
     if user_type == 'individual':
-        if holding_period < 365:  # Short-term: less than 365 days
-            return profit_or_loss * 0.075  # 7.5% tax rate for short-term capital gains
-        else:  # Long-term: more than 365 days
-            return profit_or_loss * 0.05  # 5% tax rate for long-term capital gains
+        short_term_profit_cgt = short_term_profit * 0.075 # 7.5% tax rate for short term capital gains
+        long_term_profit_cgt = long_term_profit * 0.05  # 5% tax rate for long-term capital gains
+        total_capital_gain_tax = short_term_profit_cgt + long_term_profit_cgt
+        return total_capital_gain_tax # Return total capital gain tax of both short term stocks and long term stocks
 
     return 0  # Default case (no tax)
 

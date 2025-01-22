@@ -1,14 +1,55 @@
-{% extends "layout.html" %}
+{% extends 'layout.html' %}
+
+{% block title %}Register{% endblock %}
 
 {% block content %}
-<h2>Register</h2>
-<form method="POST">
-    <label>Username:</label>
-    <input type="text" name="username">
-    <label>Email:</label>
-    <input type="email" name="email">
-    <label>Password:</label>
-    <input type="password" name="password">
-    <button type="submit">Register</button>
-</form>
+<div class="container">
+    <h2 class="mt-4">Register</h2>
+    
+    <form method="POST" action="register.html">
+        <!-- Username field -->
+        <div class="form-group">
+            <label for="username">Username</label>
+            <input type="text" class="form-control" id="username" name="username" required>
+        </div>
+
+        <!-- Email field -->
+        <div class="form-group">
+            <label for="email">Email</label>
+            <input type="email" class="form-control" id="email" name="email" required>
+        </div>
+
+        <!-- User Type field -->
+        <div class="form-group">
+            <label for="user_type">User Type</label>
+            <select class="form-control" id="user_type" name="user_type" required>
+                <option value="individual">Individual</option>
+                <option value="institution">Institution</option>
+            </select>
+        </div>
+
+        <!-- Password field -->
+        <div class="form-group">
+            <label for="password">Password</label>
+            <input type="password" class="form-control" id="password" name="password" required>
+        </div>
+
+        <!-- Submit button -->
+        <button type="submit" class="btn btn-primary mt-3">Register</button>
+    </form>
+
+    <!-- If there are any flash messages, display them here -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            <div class="mt-4">
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category }}">{{ message }}</div>
+                {% endfor %}
+            </div>
+        {% endif %}
+    {% endwith %}
+
+    <!-- Link to login page -->
+    <p class="mt-3">Already have an account? <a href="login.html">Login here</a>.</p>
+</div>
 {% endblock %}

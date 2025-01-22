@@ -25,3 +25,12 @@ login_manager.login_message_category = 'info'
 
 # Initialize Flask-Migrate
 migrate = Migrate(app, db)
+
+# Add the user loader function
+@login_manager.user_loader
+def load_user(user_id):
+    from app.models import User  # Import here to avoid circular imports
+    return User.query.get(int(user_id))
+
+# Import routes to ensure they are registered with the app
+from app import routes
