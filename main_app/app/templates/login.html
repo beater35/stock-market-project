@@ -1,14 +1,72 @@
-{% extends 'layout.html' %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/login.css') }}">
+    <title>Login & Signup</title>
+</head>
+<body>
 
-{% block title %}Login{% endblock %}
+    {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+        <div class="flash-messages">
+            {% for category, message in messages %}
+                <div class="flash-message {{ category }}">{{ message }}</div>
+            {% endfor %}
+        </div>
+    {% endif %}
+    {% endwith %}
 
-{% block content %}
-<h2>Login</h2>
-<form method="POST" action="/login">
-    <label for="email">Email:</label>
-    <input type="email" id="email" name="email" required>
-    <label for="password">Password:</label>
-    <input type="password" id="password" name="password" required>
-    <button type="submit">Login</button>
-</form>
-{% endblock %}
+    <div class="container">
+        <div class="tabs">
+            <div class="tab active" id="loginTab" onclick="showLogin()">Login</div>
+            <div class="tab" id="signupTab" onclick="showSignup()">Signup</div>
+            <div class="underline"></div>
+        </div>
+
+        <!-- Login Form -->
+        <div id="loginForm">
+            <form method="POST" action="{{ url_for('login_route') }}">
+                <div class="form-group">
+                    <label>Email Address</label>
+                    <input type="email" name="email" placeholder="Enter your email" required>
+                </div>
+                <div class="form-group">
+                    <label>Password</label>
+                    <input type="password" name="password" placeholder="Enter your password" required>
+                </div>
+                <div class="checkbox-group">
+                    <div>
+                        <input type="checkbox" id="rememberMe">
+                        <label for="rememberMe">Remember me</label>
+                    </div>
+                    <div><a href="#">Forgot Password?</a></div>
+                </div>
+                <button class="btn">Login</button>
+            </form>
+        </div>
+
+        <!-- Signup Form -->
+        <div id="signupForm" class="hidden">
+            <form method="POST" action="{{ url_for('register') }}">
+                <div class="form-group">
+                    <label>Full Name</label>
+                    <input type="text" name="username" placeholder="Enter your name" required>
+                </div>
+                <div class="form-group">
+                    <label>Email Address</label>
+                    <input type="email" name="email" placeholder="Enter your email" required>
+                </div>
+                <div class="form-group">
+                    <label>Password</label>
+                    <input type="password" name="password" placeholder="Enter your password" required>
+                </div>
+                <button class="btn">Signup</button>
+            </form>
+        </div>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/login.js') }}"></script>
+</body>
+</html>

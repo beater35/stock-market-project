@@ -1,28 +1,42 @@
-{% extends 'layout.html' %}
-
-{% block title %}Home{% endblock %}
-
-{% block content %}
-<div class="home-container">
-    <h1>Welcome to the Stock Portfolio Manager</h1>
-    <p>Manage your stock portfolio with ease. View your current stocks, add new ones, and track performance.</p>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>InsightStocks - Home</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/home.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@500&display=swap" rel="stylesheet">
+</head>
+<body>
+    <!-- Navigation Bar -->
+    <nav>
+        <div class="container">
+            <h1>InsightStocks</h1>
+            <ul>
+                <li><a href="{{ url_for('home') }}">Home</a></li>
+                <li><a href="{{ url_for('core') }}">Core</a></li>
+                <li><a href="{{ url_for('about') }}" target="_blank">About</a></li>
+                <li><a href="{{ url_for('login') }}">Login</a></li>
+            </ul>
+        </div>
+    </nav>
     
-    <div class="featured-stocks">
-        <h2>Featured Stocks</h2>
-        <ul>
-            <li><strong>Apple Inc. (AAPL)</strong> - $150.25</li>
-            <li><strong>Microsoft Corp. (MSFT)</strong> - $300.50</li>
-            <li><strong>Amazon.com Inc. (AMZN)</strong> - $3500.75</li>
-        </ul>
-    </div>
-    
-    <div class="news-section">
-        <h2>Latest Market News</h2>
-        <ul>
-            <li><a href="#">Tech Stocks Surge as Earnings Beat Expectations</a></li>
-            <li><a href="#">Inflation Concerns Weigh on Market Sentiment</a></li>
-            <li><a href="#">New Regulations Impacting Financial Sector</a></li>
-        </ul>
-    </div>
-</div>
-{% endblock %}
+
+    <!-- Hero Section -->
+    <section id="home" class="hero">
+        <div class="container">
+            <h2>Welcome to InsightStocks</h2>
+            <p>Your gateway to smarter trading decisions.</p>
+            <a href="{{ url_for('login') }}" class="btn">Get Started</a>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+        <div class="container">
+            <p>&copy; 2023 InsightStocks. All rights reserved.</p>
+        </div>
+    </footer>
+</body>
+</html>
