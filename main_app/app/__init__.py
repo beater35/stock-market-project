@@ -3,6 +3,7 @@ from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from flask_bcrypt import Bcrypt
 from flask_login import LoginManager
+# from flask_mail import Mail
 from apscheduler.schedulers.background import BackgroundScheduler
 from datetime import datetime, timedelta
 import logging
@@ -17,6 +18,15 @@ app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('DATABASE_URL')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False 
 app.config['SECRET_KEY'] = os.getenv('SECRET_KEY')
 
+# Flask-Mail Configuration
+app.config['MAIL_SERVER'] = 'smtp.gmail.com'
+app.config['MAIL_PORT'] = 587
+app.config['MAIL_USE_TLS'] = True
+app.config['MAIL_USERNAME'] = os.getenv('EMAIL_ADDRESS')
+app.config['MAIL_PASSWORD'] = os.getenv('EMAIL_PASSWORD')
+app.config['MAIL_DEFAULT_SENDER'] = os.getenv('EMAIL_ADDRESS')
+
+# Database Configuration
 db = SQLAlchemy(app)
 bcrypt = Bcrypt(app)
 login_manager = LoginManager(app)
@@ -45,7 +55,7 @@ def scrape_stock_data():
     with app.app_context():  
         now = datetime.now()
 
-        if now.weekday() in [4, 5]:
+        if now.weekday() in [1, 4, 5]:
             print("Market is closed today. Skipping scraping.")
             return
         
@@ -68,7 +78,7 @@ scheduler.add_job(
     days=1,
     id="daily_scraper",
     replace_existing=True,
-    next_run_time=datetime.now()
+    # next_run_time=datetime.now()
 )
 
 scheduler.start()

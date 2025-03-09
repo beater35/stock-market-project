@@ -42,7 +42,7 @@ class IndicatorValues(db.Model):
     date = db.Column(db.Date, nullable=False)
     rsi = db.Column(db.Float)
     sma = db.Column(db.Float)
-    obv = db.Column(db.BigInteger)  # Use BigInteger since OBV can be large
+    obv = db.Column(db.BigInteger) 
     adx = db.Column(db.Float)
     momentum = db.Column(db.Float)
 
@@ -56,9 +56,11 @@ class IndicatorEffectiveness(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     stock_symbol = db.Column(db.String(10), db.ForeignKey('stock.symbol', ondelete='CASCADE'), nullable=False)
     indicator_name = db.Column(db.String(10), nullable=False)
-    win_rate = db.Column(db.Float)  # Success rate of trades using the indicator
-    avg_profit = db.Column(db.Float)  # Avg profit per trade
-    sample_size = db.Column(db.Integer)  # Number of trades considered
+    best_buy = db.Column(db.Float) 
+    best_sell = db.Column(db.Float)
+    win_rate = db.Column(db.Float) 
+    avg_profit = db.Column(db.Float) 
+    sample_size = db.Column(db.Integer) 
     last_updated = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
     __table_args__ = (db.UniqueConstraint('stock_symbol', 'indicator_name', name='unique_stock_indicator'),)
@@ -70,6 +72,6 @@ class IndicatorEffectiveness(db.Model):
 class UserPreferences(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
-    indicator_combination = db.Column(db.JSON, nullable=False)  # JSON to store combinations
-    weightage = db.Column(db.JSON, nullable=False)  # JSON to store weightage for each combination
+    indicator_combination = db.Column(db.JSON, nullable=False)
+    weightage = db.Column(db.JSON, nullable=False)  
     user = db.relationship('User', backref='preferences', lazy=True)

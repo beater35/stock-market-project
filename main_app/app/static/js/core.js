@@ -1,115 +1,57 @@
-function fetchCompanyData(companyName) {
-  const stockPriceData = {
-    labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May'],
-    datasets: [{
-      label: 'Stock Price',
-      data: [120, 125, 130, 135, 140],
-      borderColor: 'rgb(75, 192, 192)',
-      fill: false,
-    }]
-  };
+document.addEventListener("DOMContentLoaded", function () {
+    Promise.all([
+        fetch('/api/companies').then(response => response.json()),
+        fetch('/api/indicators').then(response => response.json())
+    ])
+    .then(([companies, indicators]) => {
+        const tableBody = document.querySelector("#indicatorsTable tbody");
 
-  const indicatorData = {
-    labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May'],
-    datasets: [{
-      label: 'RSI Indicator',
-      data: [50, 60, 45, 55, 70],
-      borderColor: 'rgb(255, 159, 64)',
-      fill: false,
-    }]
-  };
+        // Sort companies alphabetically by symbol
+        companies.sort((a, b) => a.symbol.localeCompare(b.symbol));
 
-  const indicators = [
-    { name: 'RSI', signal: 'Buy', strength: 8 },
-    { name: 'MACD', signal: 'Neutral', strength: 5 },
-    { name: 'Bollinger Bands', signal: 'Sell', strength: 3 }
-  ];
+        // Map indicators by stock symbol for easy lookup
+        const indicatorsMap = {};
+        indicators.forEach(ind => {
+            indicatorsMap[ind.symbol] = ind;
+        });
 
-  // Display stock price chart
-  createPriceChart(stockPriceData);
+        // Iterate over companies and populate the table
+        companies.forEach((company, index) => {
+            const row = document.createElement("tr");
 
-  // Display indicator chart
-  createIndicatorChart(indicatorData);
+            // Serial Number (S. No.)
+            const serialCell = document.createElement("td");
+            serialCell.textContent = index + 1; // Starts from 1
+            row.appendChild(serialCell);
 
-  // Display signals
-  displaySignals(indicators);
-}
+            // Company Symbol (Clickable)
+            const symbolCell = document.createElement("td");
+            const link = document.createElement("a");
+            link.href = `/company/${company.symbol}`;
+            link.textContent = company.symbol;
+            symbolCell.appendChild(link);
+            row.appendChild(symbolCell);
 
-// Create Stock Price Chart
-function createPriceChart(data) {
-  const ctx = document.getElementById('priceChart').getContext('2d');
-  new Chart(ctx, {
-    type: 'line',
-    data: data,
-    options: {
-      scales: {
-        x: {
-          title: {
-            display: true,
-            text: 'Month'
-          }
-        },
-        y: {
-          title: {
-            display: true,
-            text: 'Price (USD)'
-          }
-        }
-      }
-    }
-  });
-}
+            // Find the latest indicator values
+            const indicatorData = indicatorsMap[company.symbol] || {};
 
-// Create Indicator Chart
-function createIndicatorChart(data) {
-  const ctx = document.getElementById('indicatorChart').getContext('2d');
-  new Chart(ctx, {
-    type: 'line',
-    data: data,
-    options: {
-      scales: {
-        x: {
-          title: {
-            display: true,
-            text: 'Month'
-          }
-        },
-        y: {
-          title: {
-            display: true,
-            text: 'RSI Value'
-          }
-        }
-      }
-    }
-  });
-}
+            // Date Column
+            const dateCell = document.createElement("td");
+            dateCell.textContent = indicatorData.date || "N/A";
+            row.appendChild(dateCell);
 
-// Display Buy/Sell Signals
-function displaySignals(indicators) {
-  const signalsList = document.getElementById('signals-list');
-  signalsList.innerHTML = '';
+            // Technical Indicator Columns
+            const indicatorsList = ["RSI", "SMA", "OBV", "ADX", "Momentum"];
+            indicatorsList.forEach(indicator => {
+                const cell = document.createElement("td");
+                cell.textContent = indicatorData[indicator] !== undefined ? indicatorData[indicator] : "N/A";
+                row.appendChild(cell);
+            });
 
-  indicators.forEach(indicator => {
-    const listItem = document.createElement('li');
-    listItem.textContent = `${indicator.name} - Signal: ${indicator.signal} (Strength: ${indicator.strength})`;
+            tableBody.appendChild(row);
+        });
 
-    if (indicator.signal === 'Buy') {
-      listItem.classList.add('buy');
-    } else if (indicator.signal === 'Sell') {
-      listItem.classList.add('sell');
-    } else {
-      listItem.classList.add('neutral');
-    }
-
-    signalsList.appendChild(listItem);
-  });
-}
-
-// Handle Search Button Click
-document.getElementById('search-btn').addEventListener('click', () => {
-  const companyName = document.getElementById('company-search').value;
-  if (companyName) {
-    fetchCompanyData(companyName);
-  }
+        console.log("Total companies:", companies.length);
+    })
+    .catch(error => console.error("Error loading data:", error));
 });

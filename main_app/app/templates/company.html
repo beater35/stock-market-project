@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ company.name }}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/company.css') }}">
+</head>
+<body>
+    <div class="container">
+        <h1>{{ company.name }} ({{ company.symbol }})</h1>
+        <p>Sector: {{ company.sector }}</p>
+        
+        <!-- Stock Price Chart -->
+        <div class="chartContainer">
+            <canvas id="stockChart"></canvas>
+            <img src="../static/images/chart.webp" alt="Stock Chart">
+        </div>    
+        
+        <!-- Indicator Signals -->
+        <div class="indicator-section">
+            <h2>Indicator Signals</h2>
+            <div class="indicator">
+                <span>Relative Strength Index (RSI)</span>
+                <div class="bar"><div class="fill green"></div></div>
+                <span class="status">Buy</span>
+            </div>
+            <div class="indicator">
+                <span>Simple Moving Average (SMA)</span>
+                <div class="bar"><div class="fill green"></div></div>
+                <span class="status">Buy</span>
+            </div>
+            <div class="indicator">
+                <span>On-Balance Volume (OBV)</span>
+                <div class="bar"><div class="fill red"></div></div>
+                <span class="status">Sell</span>
+            </div>
+            <div class="indicator">
+                <span>Average Directional Index (ADX)</span>
+                <div class="bar"><div class="fill red"></div></div>
+                <span class="status">Sell</span>
+            </div>
+        </div>
+
+        <!-- Indicator Details -->
+        <div class="indicator-details">
+            <h2>Indicator Details</h2>
+            <p><strong>Current Value:</strong> 64.5</p>
+            <p><strong>Signal:</strong> <span class="strong-buy">Strong Buy</span></p>
+            <p><strong>Trend Direction:</strong> <span class="upward">Upward ↑</span></p>
+        </div>
+    </div>
+    <script src={{ url_for('static', filename='js/company.js') }}></script>
+</body>
+</html>

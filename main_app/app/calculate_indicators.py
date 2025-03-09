@@ -26,7 +26,6 @@ def calculate_indicators(df):
     df = df.copy()
     grouped = df.groupby("stock_symbol")
     
-    # Calculate indicators for each group
     result = []
     for name, group in grouped:
         group.loc[:, "rsi"] = talib.RSI(group["close_price"], timeperiod=14)
@@ -41,7 +40,6 @@ def calculate_indicators(df):
 def insert_indicator_values_batch(df):
     """Insert or update calculated indicator values in the database in batches."""
     try:
-        # List to hold new entries
         new_entries = []
         
         for _, row in df.iterrows():
@@ -75,21 +73,17 @@ def process_stock_indicators():
     """Main function to fetch stock data, calculate indicators, and store in DB in batches."""
     stock_data = fetch_stock_data()
     if stock_data is not None and not stock_data.empty:
-        # Process in batches of, say, 10,000 rows
         batch_size = 10000
         total_rows = len(stock_data)
         
         for start in range(0, total_rows, batch_size):
             end = min(start + batch_size, total_rows)
-            batch_df = stock_data.iloc[start:end]  # Slice the data for the current batch
+            batch_df = stock_data.iloc[start:end]  
             
-            # Calculate indicators for the current batch
             batch_df = calculate_indicators(batch_df)
             
-            # Insert indicator values for the current batch
             insert_indicator_values_batch(batch_df)
             
-            # Log the progress
             current_app.logger.info(f"Processed batch {start // batch_size + 1} of {total_rows // batch_size + 1}")
     else:
         current_app.logger.info("No stock data found!")

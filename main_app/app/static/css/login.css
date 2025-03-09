@@ -23,6 +23,7 @@ body {
   text-align: center;
   display: flex;
   flex-direction: column;
+  transform: translateY(-10%);
 }
 
 .tabs {
@@ -78,7 +79,7 @@ input {
 
 input::placeholder {
   font-size: 15px; 
-  color: #939393;
+  color: #afafaf;
 }
 
 .checkbox-group {

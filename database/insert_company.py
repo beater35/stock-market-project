@@ -1,0 +1,312 @@
+import os
+import psycopg2
+from dotenv import load_dotenv
+
+# Load environment variables from the .env file
+dotenv_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', '.env')
+load_dotenv(dotenv_path)
+
+# Database connection parameters
+DB_HOST = os.getenv("DB_HOST")
+DB_NAME = os.getenv("DB_NAME")
+DB_USER = os.getenv("DB_USER")
+DB_PASSWORD = os.getenv("DB_PASSWORD")
+
+# Connect to PostgreSQL
+def create_connection():
+    try:
+        connection = psycopg2.connect(
+            host=DB_HOST,
+            database=DB_NAME,
+            user=DB_USER,
+            password=DB_PASSWORD
+        )
+        return connection
+    except Exception as e:
+        print(f"Error: {e}")
+        return None
+
+# Insert stock data into the stock table
+def insert_stock_data(stock_data):
+    connection = create_connection()
+    if connection is None:
+        print("Failed to connect to the database.")
+        return
+    
+    cursor = connection.cursor()
+
+    # Insert or check for stock symbol existence
+    try:
+        insert_query = '''
+        INSERT INTO stock (symbol, name, sector)
+        VALUES (%s, %s, %s)
+        ON CONFLICT (symbol) DO NOTHING;
+        '''
+        
+        # Insert stock data
+        for stock in stock_data:
+            # Assuming stock_data is a list of tuples: (symbol, name, sector)
+            cursor.execute(insert_query, stock)
+        
+        connection.commit()
+        print(f"{len(stock_data)} stock(s) inserted successfully.")
+    
+    except Exception as e:
+        print(f"Error inserting stock data: {e}")
+    
+    finally:
+        # Close the cursor and connection
+        cursor.close()
+        connection.close()
+
+# Manually input company stock data here
+stock_data = [
+    ('NMB', 'NMB Bank Limited', 'Commercial Bank'),
+    ('SBL', 'Siddhartha Bank Limited', 'Commercial Bank'),
+    ('KBL', 'Kumari Bank Limited', 'Commercial Bank'),
+    ('MBL', 'Machhapuchchhre Bank Limited', 'Commercial Bank'),
+    ('EBL', 'Everest Bank Limited', 'Commercial Bank'),
+    ('SBI', 'Nepal SBI Bank Limited', 'Commercial Bank'),
+    ('HBL', 'Himalayan Bank Limited', 'Commercial Bank'),
+    ('SCB', 'Standard Chartered Bank Nepal Limited', 'Commercial Bank'),
+    ('NABIL', 'Nabil Bank Limited', 'Commercial Bank'),
+    ('CZBIL', 'Citizens Bank International Limited', 'Commercial Bank'),
+    ('PCBL', 'Prime Commercial Bank Limited', 'Commercial Bank'),
+    ('ADBL', 'Agricultural Development Bank Limited', 'Commercial Bank'),
+    ('SANIMA', 'Sanima Bank Limited', 'Commercial Bank'),
+    ('NBL', 'Nepal Bank Limited', 'Commercial Bank'),
+    ('GBIME', 'Global IME Bank Limited', 'Commercial Bank'),
+    ('NICA', 'NIC Asia Bank Limited', 'Commercial Bank'),
+    ('PRVU', 'Prabhu Bank Limited', 'Commercial Bank'),
+    ('NIMB', 'Nepal Investment Mega Bank Limited', 'Commercial Bank'),
+    ('LSL', '	Laxmi Sunrise Bank Limited', 'Commercial Bank'),
+    ('AHL', 'Asian Hydropower Limited', 'Hydro Power'),
+    ('AHPC', 'Arun Valley Hydropower Development Co. Ltd.', 'Hydro Power'),
+    ('AKJCL', 'Ankhu Khola Jalvidhyut Company Ltd', 'Hydro Power'),
+    ('AKPL', 'Arun Kabeli Power Ltd.', 'Hydro Power'),
+    ('API', 'API Power Company Limited', 'Hydro Power'),
+    ('BARUN', 'Barun Hydropower Co. Ltd.', 'Hydro Power'),
+    ('BEDC', 'Bhugol Energy Development Company Limited', 'Hydro Power'),
+    ('BGWT', 'Bhagawati Hydropower Development Company Ltd', 'Hydro Power'),
+    ('BHDC', 'Bindhyabasini Hydropower Development Company Limited', 'Hydro Power'),
+    ('BHL', 'Balephi Hydropower Limited', 'Hydro Power'),
+    ('BHPL', 'Barahi Hydropower Public Limited', 'Hydro Power'),
+    ('BNHC', 'Buddha Bhumi Nepal Hydro Power Co. Ltd.', 'Hydro Power'),
+    ('BPCL', 'Butwal Power Company Limited', 'Hydro Power'),
+    ('CHCL', 'Chilime Hydropower Company Limited', 'Hydro Power'),
+    ('CHL', 'Chhyangdi Hydropower Ltd.', 'Hydro Power'),
+    ('CKHL', 'Chirkhwa Hydropower Limited', 'Hydro Power'),
+    ('DHPL', 'Dibyashwori Hydropower Ltd.', 'Hydro Power'),
+    ('DOLTI', 'Dolti Power Company Ltd', 'Hydro Power'),
+    ('DORDI', 'Dordi Khola Jalbidhyut Company Limited', 'Hydro Power'),
+    ('EHPL', 'Eastern Hydropower Limited', 'Hydro Power'),
+    ('GHL', 'Ghalemdi Hydro Limited', 'Hydro Power'),
+    ('GLH', 'GREENLIFE HYDROPOWER LIMITED', 'Hydro Power'),
+    ('GVL', 'Green Ventures Limited', 'Hydro Power'),
+    ('HDHPC', 'Himal Dolakha Hydropower Company Limited', 'Hydro Power'),
+    ('HHL', 'Himalayan Hydropower Limited', 'Hydro Power'),
+    ('HPPL', 'Himalayan Power Partner Ltd.', 'Hydro Power'),
+    ('HURJA', 'Himalaya Urja Bikas Company Limited', 'Hydro Power'),
+    ('IHL', 'Ingwa Hydropower Limited', 'Hydro Power'),
+    ('JOSHI', 'Joshi Hydropower Development Company Ltd', 'Hydro Power'),
+    ('KBSH', 'Kutheli Bukhari Small Hydropower Limited', 'Hydro Power'),
+    ('KKHC', 'Khanikhola Hydropower Co. Ltd.', 'Hydro Power'),
+    ('KPCL', 'Kalika power Company Ltd', 'Hydro Power'),
+    ('LEC', 'Liberty Energy Company Limited', 'Hydro Power'),
+    ('MAKAR', 'Makar Jitumaya Suri Hydropower Company Limited', 'Hydro Power'),
+    ('MANDU', 'Mandu Hydropower Limited', 'Hydro Power'),
+    ('MBJC', 'Madhya Bhotekoshi Jalavidyut Company Limited', 'Hydro Power'),
+    ('MCHL', 'Menchhiyam Hydropower Limited', 'Hydro Power'),
+    ('MEHL', 'Manakamana Engineering Hydropower Limited', 'Hydro Power'),
+    ('MEL', 'Modi Energy Limited', 'Hydro Power'),
+    ('MEN', 'Mountain Energy Nepal Limited', 'Hydro Power'),
+    ('MHCL', 'Molung Hydropower Company Limited', 'Hydro Power'),
+    ('MHL', 'Mandakini Hydropower Limited', 'Hydro Power'),
+    ('MHNL', 'Mountain Hydro Nepal Limited', 'Hydro Power'),
+    ('MKHC', 'Maya Khola Hydropower Company Limited', 'Hydro Power'),
+    ('MKHL', 'Mai Khola Hydropower Limited', 'Hydro Power'),
+    ('MKJC', 'Mailung Khola Jal Vidhyut Company Limited', 'Hydro Power'),
+    ('MMKJL', 'Mathillo Mailun Khola Jalvidhyut Limited', 'Hydro Power'),
+    ('MSHL', 'Mid Solu Hydropower Company Limited', 'Hydro Power'),
+    ('NGPL', 'Ngadi Group Power Ltd.', 'Hydro Power'),
+    ('NHDL', 'Nepal Hydro Developers Ltd.', 'Hydro Power'),
+    ('NHPC', 'National Hydro Power Company Limited', 'Hydro Power'),
+    ('NYADI', 'Nyadi Hydropower Limited', 'Hydro Power'),
+    ('PHCL', 'Peoples Hydropower Company Limited', 'Hydro Power'),
+    ('PMHPL', 'Panchakanya Mai Hydropower Ltd', 'Hydro Power'),
+    ('PPCL', 'Panchthar Power Company Limited', 'Hydro Power'),
+    ('PPL', "People's Power Limited", 'Hydro Power'),
+    ('RADHI', 'Radhi Bidyut Company Ltd', 'Hydro Power'),
+    ('RAWA', 'Rawa Energy Development Limited', 'Hydro Power'),
+    ('RFPL', 'River Falls Power Limited', 'Hydro Power'),
+    ('RHGCL', 'Rapti Hydro and General Construction Limited', 'Hydro Power'),
+    ('RHPL', 'RASUWAGADHI HYDROPOWER COMPANY LIMITED', 'Hydro Power'),
+    ('RIDI', 'Ridi Power Company Ltd.', 'Hydro Power'),
+    ('RURU', 'Ru Ru Jalvidhyut Pariyojana Limited', 'Hydro Power'),
+    ('SAHAS', 'Sahas Urja Limited', 'Hydro Power'),
+    ('SGHC', 'Swet-Ganga Hydropower and Construction Limited', 'Hydro Power'),
+    ('SHEL', 'Singati Hydro Energy Limited', 'Hydro Power'),
+    ('SHPC', 'Sanima Mai Hydropower Ltd', 'Hydro Power'),
+    ('SIKLES', 'Sikles Hydropower Limited', 'Hydro Power'),
+    ('SJCL', 'SANJEN JALAVIDHYUT COMPANY LIMITED', 'Hydro Power'),
+    ('SMH', 'Supermas Hydropower Limited', 'Hydro Power'),
+    ('SMHL', 'Super Madi Hydropower Limited', 'Hydro Power'),
+    ('SMJC', 'Sagarmatha Jalbidhyut Company Limited', 'Hydro Power'),
+    ('SPC', 'Samling Power Company Limited', 'Hydro Power'),
+    ('SPDL', 'Synergy Power Development Ltd', 'Hydro Power'),
+    ('SPHL', 'Sayapatri Hydropower Limited', 'Hydro Power'),
+    ('SPL', 'Shivam Power Limited', 'Hydro Power'),
+    ('SSHL', 'Shiva Shree Hydropower Ltd', 'Hydro Power'),
+    ('TAMOR', 'Sanma Middle Tamor Hydropower Limited', 'Hydro Power'),
+    ('TPC', 'Terhathum Power Company Limited', 'Hydro Power'),
+    ('TSHL', 'Three Star Hydropower Limited', 'Hydro Power'),
+    ('TVCL', 'Trishul Jal Vidhyut Company Limited', 'Hydro Power'),
+    ('UHEWA', 'Upper Hewakhola Hydropower Company Limited', 'Hydro Power'),
+    ('ULHC', 'Upper Lohore Hydropower Company Limited', 'Hydro Power'),
+    ('UMHL', 'United Modi Hydropower Ltd.', 'Hydro Power'),
+    ('UMRH', 'United Idi-Mardi and R.B. Hydropower Limited', 'Hydro Power'),
+    ('UNHPL', 'Union Hydropower Limited', 'Hydro Power'),
+    ('UPCL', 'UNIVERSAL POWER COMPANY LTD', 'Hydro Power'),
+    ('UPPER', 'Upper Tamakoshi Hydropower Ltd', 'Hydro Power'),
+    ('USHEC', 'Upper Solu Hydro Electric Company Limited', 'Hydro Power'),
+    ('USHL', 'Upper Syange Hydropower Limited', 'Hydro Power'),
+    ('VLUCL', 'Vision Lumbini Urja Company Limited', 'Hydro Power'),
+    ('CHDC', 'CEDB Holdings Limited', 'Investment'),
+    ('CIT', 'Citizen Investment Trust', 'Investment'),
+    ('ENL', 'Emerging Nepal Limited', 'Investment'),
+    ('HATHY', 'Hathway Investment Nepal Limited', 'Investment'),
+    ('HIDCL', 'Hydroelectricity Investment and Development Company Ltd', 'Investment'),
+    ('NIFRA', 'Nepal Infrastructure Bank Limited', 'Investment'),
+    ('NRN', 'NRN Infrastructure and Development Limited', 'Investment'),
+    ('ACLBSL', 'Aarambha Chautari Laghubitta Bittiya Sanstha Limited', 'Microfinance'),
+    ('ALBSL', 'Asha Laghubitta Bittiya Sanstha Ltd', 'Microfinance'),
+    ('ANLB', 'Aatmanirbhar Laghubitta Bittiya Sanstha Limited', 'Microfinance'),
+    ('AVYAN', 'Avyan Laghubitta Bittiya Sanstha Limited', 'Microfinance'),
+    ('CBBL', 'Chhimek Laghubitta Bikas Bank Limited', 'Microfinance'),
+    ('CYCL', 'Cyc Nepal Laghubitta Bittiya Sanstha Limited', 'Microfinance'),
+    ('DDBL', 'Deprosc Laghubitta Bittiya Sanstha Limited', 'Microfinance'),
+    ('DLBS', 'Dhaulagiri Laghubitta Bittiya Sanstha Limited', 'Microfinance'),
+    ('FMDBL', 'First Micro Finance Development Bank Ltd', 'Microfinance'),
+    ('FOWAD', 'Forward Community Microfinance Bittiya Sanstha Ltd', 'Microfinance'),
+    ('GBLBS', 'Grameen Bikas Laghubitta Bittiya Sanstha Ltd', 'Microfinance'),
+    ('GILB', 'Global IME Laghubitta Bittiya Sanstha Ltd.', 'Microfinance'),
+    ('GLBSL', 'Gurans Laghubitta Bittiya Sanstha Limited', 'Microfinance'),
+    ('GMFBS', 'Ganapati Microfinance Bittiya Sanstha Limited', 'Microfinance'),
+    ('HLBSL', 'Himalayan Laghubitta Bittiya Sanstha Ltd', 'Microfinance'),
+    ('ILBS', 'Infinity Laghubitta Bittiya Sanstha Limited', 'Microfinance'),
+    ('JBLB', 'Jeevan Bikas Laghubitta Bittiya Sanstha Limited', 'Microfinance'),
+    ('JSLBB', 'Janautthan Samudayic Laghubitta Bittiya Sanstha Limited', 'Microfinance'),
+    ('KMCDB', 'Kalika Laghubitta Bittiya Sanstha Ltd', 'Microfinance'),
+    ('LLBS', 'Laomi Laghubitta Bittiya Sanstha Ltd', 'Microfinance'),
+    ('MATRI', 'Matribhumi Laghubitta Bittiya Sanstha', 'Microfinance'),
+    ('MERO', 'Mero Microfinance Bittiya Sanstha Ltd', 'Microfinance'),
+    ('MLBBL', 'Mithila Laghubitta Bittiya Sanstha Limited', 'Microfinance'),
+    ('MLBS', 'Manushi Laghubitta Bittiya Sanstha Limited', 'Microfinance'),
+    ('MLBSL', 'Mahila Laghubitta Bittiya Sanstha Ltd', 'Microfinance'),
+    ('MSLB', 'Mahuli Samudayik Laghubitta Bittiya Sanstha Ltd', 'Microfinance'),
+    ('NADEP', 'Nadep Laghubitta Bittiya Sanstha Ltd', 'Microfinance'),
+    ('NESDO', 'NESDO Sambha Laghubitta Bittiya Sanstha Limited', 'Microfinance'),
+    ('NICLBSL', 'NIC ASIA Laghubitta Bittiya Sanstha Limited', 'Microfinance'),
+    ('NMBMF', 'NMB Microfinance Bittiya Sanstha', 'Microfinance'),
+    ('NMFBS', 'National Microfinance Bittiya Sanstha', 'Microfinance'),
+    ('NMLBBL', 'Nerude Mirmire Laghubitta Bittiya Sanstha Limited', 'Microfinance'),
+    ('NUBL', 'Nirdhan Utthan Laghubitta Bittiya Sanstha Limited', 'Microfinance'),
+    ('RSDC', 'RSDC Laghubitta Bittiya Sanstha', 'Microfinance'),
+    ('SAMAJ', 'Samaj Laghubitta Bittiya Sanstha Limited', 'Microfinance'),
+    ('SHLB', 'Shrijanshil Laghubitta Bittiya Sanstha Limited', 'Microfinance'),
+    ('SKBBL', 'Sana Kisan Laghubitta Bittiya Sanstha Limited', 'Microfinance'),
+    ('SLBBL', 'Swarojgar Laghu Bitta Bikas Bank Ltd', 'Microfinance'),
+    ('SLBSL', 'Samudayik Laghubitta Bittiya Sanstha Limited', 'Microfinance'),
+    ('SMATA', 'Samata Gharelu Laghubitta Bittiya Sanstha Limited', 'Microfinance'),
+    ('SMB', 'Support Microfinance Bittiya Sanstha', 'Microfinance'),
+    ('SMFBS', 'Swabhimaan Laghubitta Bittiya Sanstha Limited', 'Microfinance'),
+    ('SMPDA', 'Sampada Laghubitta Bittiya Sanstha Limited', 'Microfinance'),
+    ('SWBBL', 'Swabalamban Laghubitta Bittiya Sanstha Limited', 'Microfinance'),
+    ('SWMF', 'Suryodaya Women Laghubitta Bittiya Sanstha Limited', 'Microfinance'),
+    ('ULBSL', 'Upakar Laghubitta Bittiya Sanstha Limited', 'Microfinance'),
+    ('UNLB', 'Unique Nepal Laghubitta Bittiya Sanstha', 'Microfinance'),
+    ('USLB', 'Unnati Sahakarya Laghubitta Bittiya Sanstha Limited', 'Microfinance'),
+    ('VLBS', 'Vijaya Laghubitta Bittiya Sanstha', 'Microfinance'),
+    ('WNLB', 'Wean Nepal Laghubitta Bittiya Sanstha', 'Microfinance'),
+    ('BNL', 'Bottlers Nepal (Balaju) Limited', 'Manufacturing And Processing'),
+    ('BNT', 'Bottlers Nepal (Terai) Limited', 'Manufacturing And Processing'),
+    ('GCIL', 'Ghorahi Cement Industry Limited', 'Manufacturing And Processing'),
+    ('HDL', 'Himalayan Distillery Limited', 'Manufacturing And Processing'),
+    ('NLO', 'Nepal Lube Oil Limited', 'Manufacturing And Processing'),
+    ('SARBTM', 'Sarbottam Cement Limited', 'Manufacturing And Processing'),
+    ('SHIVM', 'SHIVAM CEMENTS LTD', 'Manufacturing And Processing'),
+    ('SONA', 'Sonapur Minerals and Oil Limited', 'Manufacturing And Processing'),
+    ('UNL', 'Unilever Nepal Limited', 'Manufacturing And Processing'),
+    ('CORBL', 'Corporate Development Bank Limited', 'Development Bank'),
+    ('EDBL', 'Excel Development Bank Ltd.', 'Development Bank'),
+    ('GBBL', 'Garima Bikas Bank Limited', 'Development Bank'),
+    ('GRDBL', 'Green Development Bank Ltd.', 'Development Bank'),
+    ('JBBL', 'Jyoti Bikas Bank Limited', 'Development Bank'),
+    ('KSBBL', 'Kamana Sewa Bikas Bank Limited', 'Development Bank'),
+    ('LBBL', 'Lumbini Bikas Bank Ltd.', 'Development Bank'),
+    ('MDB', 'Miteri Development Bank Limited', 'Development Bank'),
+    ('MLBL', 'Mahalaxmi Bikas Bank Ltd.', 'Development Bank'),
+    ('MNBBL', 'Muktinath Bikas Bank Ltd.', 'Development Bank'),
+    ('NABBC', 'Narayani Development Bank Limited', 'Development Bank'),
+    ('SADBL', 'Shangrila Development Bank Ltd.', 'Development Bank'),
+    ('SAPDBL', 'Saptakoshi Development Bank Ltd', 'Development Bank'),
+    ('SHINE', 'Shine Resunga Development Bank Ltd.', 'Development Bank'),
+    ('SINDU', 'Sindhu Bikash Bank Ltd', 'Development Bank'),
+    ('BFC', 'Best Finance Company Ltd.', 'Finance'),
+    ('CFCL', 'Central Finance Co. Ltd.', 'Finance'),
+    ('GFCL', 'Goodwill Finance Co. Ltd.', 'Finance'),
+    ('GMFIL', 'Guheshowori Merchant Bank & Finance Co. Ltd.', 'Finance'),
+    ('GUFL', 'Gurkhas Finance Ltd.', 'Finance'),
+    ('ICFC', 'ICFC Finance Limited', 'Finance'),
+    ('JFL', 'Janaki Finance Ltd.', 'Finance'),
+    ('MFIL', 'Manjushree Finance Ltd.', 'Finance'),
+    ('MPFL', 'Multipurpose Finance Company Limited', 'Finance'),
+    ('NFS', 'Nepal Finance Ltd.', 'Finance'),
+    ('PFL', 'Pokhara Finance Ltd.', 'Finance'),
+    ('PROFL', 'Progressive Finance Limited', 'Finance'),
+    ('RLFL', 'Reliance Finance Ltd.', 'Finance'),
+    ('SFCL', 'Samriddhi Finance Company Limited', 'Finance'),
+    ('SIFC', 'Shree Investment Finance Co. Ltd.', 'Finance'),
+    ('CGH', 'Chandragiri Hills Limited', 'Hotel'),
+    ('CITY', 'City Hotel Limited', 'Hotel'),
+    ('KDL', 'Kalinchowk Darshan Limited', 'Hotel'),
+    ('OHL', 'Oriental Hotels Limited', 'Hotel'),
+    ('SHL', 'Soaltee Hotel Limited', 'Hotel'),
+    ('TRH', 'Taragaon Regency Hotel Limited', 'Hotel'),
+    ('ALICL', 'Asian Life Insurance Co. Limited', 'Life Insurance'),
+    ('CLI', 'Citizen Life Insurance Company Limited', 'Life Insurance'),
+    ('HLI', 'Himalayan Life Insurance Limited', 'Life Insurance'),
+    ('ILI', 'IME Life Insurance Company Limited', 'Life Insurance'),
+    ('LICN', 'Life Insurance Co. Nepal', 'Life Insurance'),
+    ('NLIC', 'Nepal Life Insurance Co. Ltd.', 'Life Insurance'),
+    ('NLICL', 'National Life Insurance Co. Ltd.', 'Life Insurance'),
+    ('PMLI', 'Prabhu Mahalaxmi Life Insurance Ltd', 'Life Insurance'),
+    ('RNLI', 'Reliable Nepal Life Insurance Limited', 'Life Insurance'),
+    ('SJLIC', 'Suryajyoti Life Insurance Company Limited', 'Life Insurance'),
+    ('SNLI', 'Sun Nepal Life Insurance Company Limited', 'Life Insurance'),
+    ('SRLI', 'Sanima Reliance Life Insurance Limited', 'Life Insurance'),
+    ('HRL', 'Himalayan Reinsurance Limited', 'Other'),
+    ('MKCL', 'Muktinath Krishi Company Limited', 'Other'),
+    ('NRIC', 'Nepal Reinsurance Company Limited', 'Other'),
+    ('NRM', 'Nepal Republic Media Limited', 'Other'),
+    ('NTC', 'Nepal Doorsanchar Comapany Limited', 'Other'),
+    ('NWCL', 'Nepal Warehousing Company Ltd', 'Other'),
+    ('HEI', 'Himalayan Everest Insurance Limited', 'Non-Life Insurance'),
+    ('IGI', 'IGI Prudential Insurance Limited', 'Non-Life Insurance'),
+    ('NICL', 'Nepal Insurance Co. Ltd.', 'Non-Life Insurance'),
+    ('NIL', 'Neco Insurance Co. Ltd.', 'Non-Life Insurance'),
+    ('NLG', 'NLG Insurance Company Ltd.', 'Non-Life Insurance'),
+    ('PRIN', 'Prabhu Insurance Ltd.', 'Non-Life Insurance'),
+    ('RBCL', 'Rastriya Beema Company Limited', 'Non-Life Insurance'),
+    ('SALICO', 'Sagarmatha Lumbini Insurance Company Limited', 'Non-Life Insurance'),
+    ('SGIC', 'Sanima GIC Insurance Limited', 'Non-Life Insurance'),
+    ('SICL', 'Shikhar Insurance Co. Ltd.', 'Non-Life Insurance'),
+    ('SPIL', 'Siddhartha Premier Insurance Limited', 'Non-Life Insurance'),
+    ('UAIL', 'United Ajod Insurance Limited', 'Non-Life Insurance'),
+    ('BBC', 'Bishal Bazar Company Limited', 'Trading'),
+    ('STC', 'Salt Trading Corporation', 'Trading')
+]
+
+# Call the insert function
+if __name__ == "__main__":
+    insert_stock_data(stock_data)
