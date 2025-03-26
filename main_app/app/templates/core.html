@@ -3,15 +3,29 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Company Indicators</title>
-    <link rel="stylesheet" href="{{ url_for ('static', filename='css/core.css') }}">
+    <title>Company Technical Indicators</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/core.css') }}">
 </head>
 <body>
-    <h1>Company Technical Indicators</h1>
+    <h1>Stock Analysis Dashboard</h1>
+
+    <a href="/live-market" target="_blank" class="live-data-btn">
+        <span class="pulse-dot"></span>
+        <span class="btn-text">View Live Market Indicators</span>
+        <span class="arrow-icon">→</span>
+    </a>
+    
+    <div class="filter-tabs">
+        <button class="filter-tab active" data-filter="all">All Stocks</button>
+        <button class="filter-tab" data-filter="bullish">Bullish</button>
+        <button class="filter-tab" data-filter="bearish">Bearish</button>
+        <div class="stocks-count">Showing <span id="stocksCount">0</span> stocks</div>
+    </div>
+    
     <table id="indicatorsTable">
         <thead>
             <tr>
-                <th>S.no</th>
+                <th>S.No</th>
                 <th>Company</th>
                 <th>Date</th>
                 <th>RSI</th>
@@ -19,7 +33,8 @@
                 <th>OBV</th>
                 <th>ADX</th>
                 <th>Momentum</th>
-                <!-- Add other indicators as needed -->
+                <th>Sentiment</th>
+                <th>Actions</th>
             </tr>
         </thead>
         <tbody>

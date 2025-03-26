@@ -75,3 +75,31 @@ class UserPreferences(db.Model):
     indicator_combination = db.Column(db.JSON, nullable=False)
     weightage = db.Column(db.JSON, nullable=False)  
     user = db.relationship('User', backref='preferences', lazy=True)
+
+
+class LiveStockPrice(db.Model):
+    id = db.Column(db.Integer, primary_key=True)  
+    stock_symbol = db.Column(db.String(10), db.ForeignKey('stock.symbol'), nullable=False)
+    date = db.Column(db.Date, nullable=False)
+    time = db.Column(db.Time, nullable=False)
+    price = db.Column(db.Float, nullable=False)
+    volume = db.Column(db.Integer, nullable=False)
+
+    __table_args__ = (db.UniqueConstraint('stock_symbol', 'date', 'time', name='unique_live_data'),)
+
+    def __repr__(self):
+        return f'<LiveStockPrice {self.stock_symbol} {self.date} {self.time} {self.price}>'
+
+
+class LiveIndicatorValue(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    stock_symbol = db.Column(db.String(10), db.ForeignKey('stock.symbol', ondelete='CASCADE'), nullable=False)
+    date = db.Column(db.Date, nullable=False)
+    time = db.Column(db.Time, nullable=False) 
+    indicator_name = db.Column(db.String(50), nullable=False)  # Name of the indicator like 'RSI', 'SMA'
+    value = db.Column(db.Float, nullable=True)  
+
+    __table_args__ = (db.UniqueConstraint('stock_symbol', 'date', 'time', 'indicator_name', name='unique_stock_date_time_indicator'),)
+
+    def __repr__(self):
+        return f"<IndicatorValue {self.stock_symbol} {self.date} {self.time} {self.indicator_name}>"

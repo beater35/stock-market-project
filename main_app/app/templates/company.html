@@ -3,53 +3,152 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ company.name }}</title>
+    <title>Company Analysis</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/company.css') }}">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
     <div class="container">
-        <h1>{{ company.name }} ({{ company.symbol }})</h1>
-        <p>Sector: {{ company.sector }}</p>
-        
-        <!-- Stock Price Chart -->
-        <div class="chartContainer">
-            <canvas id="stockChart"></canvas>
-            <img src="../static/images/chart.webp" alt="Stock Chart">
-        </div>    
-        
-        <!-- Indicator Signals -->
-        <div class="indicator-section">
-            <h2>Indicator Signals</h2>
-            <div class="indicator">
-                <span>Relative Strength Index (RSI)</span>
-                <div class="bar"><div class="fill green"></div></div>
-                <span class="status">Buy</span>
-            </div>
-            <div class="indicator">
-                <span>Simple Moving Average (SMA)</span>
-                <div class="bar"><div class="fill green"></div></div>
-                <span class="status">Buy</span>
-            </div>
-            <div class="indicator">
-                <span>On-Balance Volume (OBV)</span>
-                <div class="bar"><div class="fill red"></div></div>
-                <span class="status">Sell</span>
-            </div>
-            <div class="indicator">
-                <span>Average Directional Index (ADX)</span>
-                <div class="bar"><div class="fill red"></div></div>
-                <span class="status">Sell</span>
-            </div>
+    <div class="header">
+        <a href="{{ url_for('core') }}" class="back-link">
+        <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+        </svg>
+        Back to Dashboard
+        </a>
+    </div>
+    
+    <div class="stock-header">
+        <div class="stock-info">
+        <h1 class="stock-title">AAPL</h1>
+        <span class="bullish-pill">Bullish</span>
+        <div class="last-updated">
+            <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+            </svg>
+            Last updated: 2023-08-15
         </div>
-
-        <!-- Indicator Details -->
-        <div class="indicator-details">
-            <h2>Indicator Details</h2>
-            <p><strong>Current Value:</strong> 64.5</p>
-            <p><strong>Signal:</strong> <span class="strong-buy">Strong Buy</span></p>
-            <p><strong>Trend Direction:</strong> <span class="upward">Upward ↑</span></p>
+        </div>
+        <div class="action-buttons">
+        <button class="btn btn-secondary">
+            <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+            </svg>
+            Historical Data
+        </button>
+        <button class="btn btn-primary">
+            <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
+            </svg>
+            External Analysis
+        </button>
         </div>
     </div>
-    <script src={{ url_for('static', filename='js/company.js') }}></script>
-</body>
+    
+    <div class="dashboard">
+        <div class="main-content">
+        <div class="card">
+            <h2 class="card-title">Price Chart</h2>
+            <div class="price-chart">
+            <svg viewBox="0 0 400 200" width="100%" height="100%">
+                <path d="M0,150 C20,130 40,160 60,140 C80,120 100,140 120,130 C140,120 160,100 180,90 C200,80 220,60 240,70 C260,80 280,50 300,40 C320,30 340,50 360,40 C380,30 400,40 400,50" class="chart-line"></path>
+            </svg>
+            </div>
+        </div>
+        
+        <div class="card">
+            <h2 class="card-title">Technical Indicators Analysis</h2>
+            <div class="tab-group">
+            <div class="tab active">All Signals</div>
+            <div class="tab">Buy (4)</div>
+            <div class="tab">Sell (0)</div>
+            <div class="tab">Other</div>
+            </div>
+            
+            <div class="indicator">
+            <div class="indicator-header">
+                <div class="indicator-title">
+                RSI
+                <span class="indicator-info">i</span>
+                </div>
+                <div class="indicator-signal buy-signal">
+                <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 10l7-7m0 0l7 7m-7-7v18"></path>
+                </svg>
+                Buy
+                </div>
+            </div>
+            <div class="toggle-details">- Hide details</div>
+            <div class="indicator-description">
+                The RSI is below 30, indicating an oversold condition. This is traditionally seen as a buying opportunity.
+            </div>
+            </div>
+            
+            <div class="indicator">
+            <div class="indicator-header">
+                <div class="indicator-title">
+                ADX
+                <span class="indicator-info">i</span>
+                </div>
+                <div class="indicator-signal trend-signal">
+                <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path>
+                </svg>
+                Strong Trend
+                </div>
+            </div>
+            <div class="toggle-details">+ Show details</div>
+            </div>
+            
+            <div class="indicator">
+            <div class="indicator-header">
+                <div class="indicator-title">
+                Momentum
+                <span class="indicator-info">i</span>
+                </div>
+                <div class="indicator-signal buy-signal">
+                <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 10l7-7m0 0l7 7m-7-7v18"></path>
+                </svg>
+                Buy
+                </div>
+            </div>
+            <div class="toggle-details">+ Show details</div>
+            </div>
+        </div>
+        </div>
+        
+        <div class="sidebar">
+        <div class="card">
+            <h2 class="card-title">Signal Summary</h2>
+            <div class="signal-list">
+            <div class="signal-item">
+                <div>Buy Signals:</div>
+                <div class="signal-count count-blue">4</div>
+            </div>
+            <div class="signal-item">
+                <div>Sell Signals:</div>
+                <div class="signal-count count-red">0</div>
+            </div>
+            <div class="signal-item">
+                <div>Other Signals:</div>
+                <div class="signal-count count-gray">1</div>
+            </div>
+            </div>
+            
+            <div class="sentiment">
+            <div>Overall Sentiment:</div>
+            <span class="bullish-pill" style="margin-left: 10px;">Bullish</span>
+            </div>
+            
+            <button class="full-width-btn btn-primary">Add to Watchlist</button>
+            <button class="full-width-btn btn-secondary">Export Analysis</button>
+        </div>
+        </div>
+    </div>
+    </div>
+    <script src="{{ url_for('static', filename='js/company.js') }}"></script>
+</body>    
 </html>
+
+

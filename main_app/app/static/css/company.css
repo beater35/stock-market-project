@@ -1,118 +1,288 @@
-/* General Styles */
-body {
-    font-family: Arial, sans-serif;
+* {
     margin: 0;
     padding: 0;
-    background: #ffffff; 
-    overflow-y: auto;
+    box-sizing: border-box;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
 }
 
-/* Full-width container with 10% margin on both sides */
-.container {
-    max-width: 80%;
-    margin: 20px auto;
+body {
+    background-color: #f5f7fa;
+    color: #333;
     padding: 20px;
+    display: flex;
+    justify-content: center;
 }
 
-/* Headings */
-h1, h2 {
-    text-align: center;
+.container {
+    width: 100%;
+    max-width: 1200px; /* Constrains the width */
+}
+
+.header {
+    display: flex;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.back-link {
+    color: #2563eb;
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    font-size: 14px;
+}
+
+.back-link svg {
+    margin-right: 5px;
+}
+
+.stock-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.stock-info {
+    display: flex;
+    align-items: center;
+}
+
+.stock-title {
+    font-size: 28px;
+    font-weight: bold;
+    margin-right: 15px;
+}
+
+.bullish-pill {
+    background-color: #2563eb;
+    color: white;
+    border-radius: 20px;
+    padding: 4px 12px;
+    font-size: 12px;
+    font-weight: bold;
+}
+
+.last-updated {
+    display: flex;
+    align-items: center;
+    font-size: 12px;
+    color: #6b7280;
+    margin-left: 15px;
+}
+
+.last-updated svg {
+    margin-right: 5px;
+}
+
+.action-buttons {
+    display: flex;
+    gap: 10px;
+}
+
+.btn {
+    padding: 8px 15px;
+    border-radius: 6px;
+    font-weight: 500;
+    cursor: pointer;
+    font-size: 14px;
+    display: flex;
+    align-items: center;
+}
+
+.btn-secondary {
+    background-color: #f9fafb;
+    border: 1px solid #d1d5db;
+    color: #374151;
+}
+
+.btn-primary {
+    background-color: #2563eb;
+    border: 1px solid #2563eb;
+    color: white;
+}
+
+.btn svg {
+    margin-right: 5px;
+}
+
+.dashboard {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 20px;
+}
+
+.card {
+    background-color: white;
+    border-radius: 8px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    padding: 20px;
+    margin-bottom: 20px;
+}
+
+.card-title {
+    font-size: 18px;
+    font-weight: bold;
     margin-bottom: 15px;
 }
 
-/* Search Bar */
-.search-container {
-    display: flex;
-    justify-content: center;
-    margin-bottom: 20px;
+.price-chart {
+    height: 250px;
+    position: relative;
 }
 
-#searchBar {
-    width: 90%;
-    max-width: 500px;
-    padding: 10px;
-    border: 1px solid #ccc;
-    border-radius: 5px;
-}
-
-/* Stock Price Chart */
-.chart-container {
+.chart-line {
+    position: absolute;
+    top: 0;
+    left: 0;
     width: 100%;
-    max-width: 100%;
-    height: 300px; /* Fixed height */
+    height: 100%;
+    stroke: #2563eb;
+    stroke-width: 2;
+    fill: none;
+}
+
+.signal-item {
     display: flex;
-    justify-content: center;
+    justify-content: space-between;
+    margin-bottom: 15px;
     align-items: center;
-    overflow: hidden; /* Prevent overflow */
-    background: transparent; /* Remove background */
+}
+
+.signal-count {
+    width: 25px;
+    height: 25px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    font-weight: bold;
+    color: white;
+}
+
+.count-blue {
+    background-color: #2563eb;
+}
+
+.count-red {
+    background-color: #ef4444;
+}
+
+.count-gray {
+    background-color: #6b7280;
+}
+
+.sentiment {
+    display: flex;
+    align-items: center;
+    margin: 20px 0;
+}
+
+.full-width-btn {
+    display: block;
+    width: 100%;
+    padding: 10px;
+    text-align: center;
+    border-radius: 6px;
+    margin-bottom: 10px;
+    cursor: pointer;
+}
+
+.tab-group {
+    display: flex;
+    gap: 10px;
     margin-bottom: 20px;
 }
 
-/* Ensuring Image Stays Inside the Chart */
-.chart-container img {
-    max-width: 100%; /* Ensures it never exceeds the container */
-    max-height: 100%; /* Ensures it fits within the container */
-    object-fit: contain; /* Keeps aspect ratio and avoids stretching */
+.tab {
+    padding: 6px 12px;
+    font-size: 14px;
+    cursor: pointer;
+    border-radius: 6px;
 }
 
-
-/* Indicator Signals */
-.indicator-section {
-    margin-top: 20px;
+.tab.active {
+    background-color: #f3f4f6;
 }
 
 .indicator {
+    border-bottom: 1px solid #e5e7eb;
+    padding-bottom: 15px;
+    margin-bottom: 15px;
+}
+
+.indicator-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+.indicator-title {
     display: flex;
     align-items: center;
-    justify-content: space-between;
-    padding: 10px 0;
 }
 
-/* Progress Bar */
-.bar {
-    width: 60%;
-    height: 10px;
-    background: #ddd;
-    border-radius: 5px;
-    overflow: hidden;
-    margin: 0 10px;
+.indicator-info {
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background-color: #e5e7eb;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-left: 5px;
+    font-size: 12px;
+    color: #6b7280;
 }
 
-.fill {
-    height: 100%;
-    width: 100%;
+.indicator-signal {
+    padding: 5px 10px;
+    border-radius: 4px;
+    font-size: 12px;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
 }
 
-.green { background: green; }
-.red { background: red; }
-
-.status {
-    font-weight: bold;
+.buy-signal {
+    background-color: #ecfdf5;
+    color: #047857;
 }
 
-/* Indicator Details */
-.indicator-details {
-    margin-top: 20px;
-    padding: 15px;
+.trend-signal {
+    background-color: #ecfdf5;
+    color: #047857;
 }
 
-.strong-buy {
-    font-weight: bold;
-    color: green;
+.toggle-details {
+    color: #2563eb;
+    font-size: 12px;
+    cursor: pointer;
+    margin-top: 5px;
+    display: inline-block;
 }
 
-.upward {
-    color: green;
-    font-weight: bold;
+.indicator-description {
+    color: #6b7280;
+    font-size: 14px;
+    line-height: 1.5;
+    margin-top: 10px;
 }
 
-/* Scrollable Page */
-html, body {
-    height: 100%;
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .dashboard {
+    grid-template-columns: 1fr;
+    }
+    
+    .stock-header {
+    flex-direction: column;
+    align-items: flex-start;
+    }
+    
+    .action-buttons {
+    margin-top: 15px;
+    }
 }
-
-.container {
-    min-height: 100vh;
-    overflow-y: auto;
-}
-

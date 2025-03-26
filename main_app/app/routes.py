@@ -2,10 +2,138 @@ from flask import jsonify, render_template, redirect, url_for, flash, request
 from flask_login import login_user, logout_user, login_required, current_user
 from flask_bcrypt import Bcrypt
 from app import app, db, bcrypt  
+import math
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.sql import func
-from app.models import User, Stock, IndicatorValues
+from datetime import datetime, timedelta
 # from app.email_service import send_reset_email, s
+from app.models import User, Stock, IndicatorValues, StockPrice, LiveIndicatorValue
+
+
+# Live market page route
+@app.route('/live-market')
+def live_market():
+    return render_template('live_market.html')
+
+
+# Live signals route
+@app.route('/api/live-signals')
+def get_buy_sell_signals():
+    # Get the latest indicator values for each stock
+    latest_timestamps = db.session.query(
+        LiveIndicatorValue.stock_symbol,
+        func.max(LiveIndicatorValue.date).label('max_date')
+    ).group_by(LiveIndicatorValue.stock_symbol).subquery('latest_dates')
+
+    latest_times = db.session.query(
+        latest_timestamps.c.stock_symbol,
+        latest_timestamps.c.max_date,
+        func.max(LiveIndicatorValue.time).label('max_time')
+    ).join(
+        LiveIndicatorValue,
+        db.and_(
+            LiveIndicatorValue.stock_symbol == latest_timestamps.c.stock_symbol,
+            LiveIndicatorValue.date == latest_timestamps.c.max_date
+        )
+    ).group_by(
+        latest_timestamps.c.stock_symbol,
+        latest_timestamps.c.max_date
+    ).subquery('latest_times')
+
+    latest_records = db.session.query(LiveIndicatorValue).join(
+        latest_times,
+        db.and_(
+            LiveIndicatorValue.stock_symbol == latest_times.c.stock_symbol,
+            LiveIndicatorValue.date == latest_times.c.max_date,
+            LiveIndicatorValue.time == latest_times.c.max_time
+        )
+    ).all()
+
+    result = {}
+    for record in latest_records:
+        key = f"{record.stock_symbol}_{record.date}_{record.time}"
+        if key not in result:
+            result[key] = {
+                "stock_symbol": record.stock_symbol,
+                "date": record.date.isoformat(),
+                "time": record.time.strftime("%H:%M:%S")
+            }
+
+        # Calculate buy/sell signal based on standard thresholds for each indicator
+        if record.indicator_name == 'RSI':
+            result[key]["RSI"] = "Buy" if record.value < 30 else "Sell" if record.value > 70 else "Hold"
+        
+        elif record.indicator_name == 'ADX':
+            result[key]["ADX"] = "Strong Trend" if record.value > 25 else "Weak Trend"
+        
+        elif record.indicator_name == 'Momentum':
+            result[key]["Momentum"] = "Buy" if record.value > 0 else "Sell"  # Standard momentum interpretation (buy > 0, sell < 0)
+        
+        elif record.indicator_name == 'SMA':
+            # Assuming you have a logic for SMA (e.g., comparing short-term and long-term SMAs)
+            result[key]["SMA"] = "Buy" if record.value > 50 else "Sell"  # Example threshold (change as needed)
+        
+        elif record.indicator_name == 'OBV':
+            result[key]["OBV"] = "Buy" if record.value > 0 else "Sell"  # Simple OBV buy/sell logic
+
+    return jsonify(list(result.values()))
+
+
+# Live data route (?debug=true)
+@app.route('/api/live-indicators')
+def get_live_indicators():
+    # Get the latest indicator values for each stock
+    # First, get distinct stock symbols with their latest date and time
+    latest_timestamps = db.session.query(
+        LiveIndicatorValue.stock_symbol,
+        func.max(LiveIndicatorValue.date).label('max_date')
+    ).group_by(LiveIndicatorValue.stock_symbol).subquery('latest_dates')
+    
+    # Then, for each stock and its latest date, get the latest time
+    latest_times = db.session.query(
+        latest_timestamps.c.stock_symbol,
+        latest_timestamps.c.max_date,
+        func.max(LiveIndicatorValue.time).label('max_time')
+    ).join(
+        LiveIndicatorValue,
+        db.and_(
+            LiveIndicatorValue.stock_symbol == latest_timestamps.c.stock_symbol,
+            LiveIndicatorValue.date == latest_timestamps.c.max_date
+        )
+    ).group_by(
+        latest_timestamps.c.stock_symbol,
+        latest_timestamps.c.max_date
+    ).subquery('latest_times')
+    
+    # Finally, get all indicator values for each stock at its latest timestamp
+    latest_records = db.session.query(LiveIndicatorValue).join(
+        latest_times,
+        db.and_(
+            LiveIndicatorValue.stock_symbol == latest_times.c.stock_symbol,
+            LiveIndicatorValue.date == latest_times.c.max_date,
+            LiveIndicatorValue.time == latest_times.c.max_time
+        )
+    ).all()
+    
+    # Organize the data by stock symbol, date, and time
+    result = {}
+    for record in latest_records:
+        key = f"{record.stock_symbol}_{record.date}_{record.time}"
+        if key not in result:
+            result[key] = {
+                "stock_symbol": record.stock_symbol,
+                "date": record.date.isoformat(),
+                "time": record.time.strftime("%H:%M:%S")
+            }
+        
+        # Add each indicator to the result with NaN handling
+        if record.value is not None and not (isinstance(record.value, float) and math.isnan(record.value)):
+            result[key][record.indicator_name] = record.value
+        else:
+            result[key][record.indicator_name] = None
+    
+    # Convert to list and return
+    return jsonify(list(result.values()))
 
 
 # Home route
@@ -33,16 +161,12 @@ def core():
     return render_template('core.html')
 
 
-from flask import jsonify
-from datetime import date
-from app import db
-from app.models import IndicatorValues, Stock
-
-@app.route('/api/companies', methods=['GET'])
+# Core page signal route buy/sell 
+@app.route('/api/signals', methods=['GET'])
 def get_companies():
     companies = Stock.query.order_by(Stock.symbol).all()
     company_data = []
-
+    
     for company in companies:
         latest_indicator = (
             IndicatorValues.query
@@ -50,36 +174,46 @@ def get_companies():
             .order_by(IndicatorValues.date.desc())  # Get the latest entry
             .first()
         )
-
+        
         if latest_indicator:
             signals = {
                 "RSI": "Buy" if latest_indicator.rsi < 30 else "Sell" if latest_indicator.rsi > 70 else "Hold",
                 "ADX": "Strong Trend" if latest_indicator.adx > 25 else "Weak Trend",
                 "Momentum": "Buy" if latest_indicator.momentum > 0 else "Sell",
-                "SMA": "Buy" if latest_indicator.sma > latest_indicator.rsi else "Sell",  # Example logic
+                "SMA": "Buy" if latest_indicator.sma > 50 else "Sell",
                 "OBV": "Buy" if latest_indicator.obv > 0 else "Sell"
             }
-
+            
+            # Calculate sentiment based on signals
+            buy_count = sum(1 for signal in signals.values() if signal == "Buy")
+            sell_count = sum(1 for signal in signals.values() if signal == "Sell")
+            
+            # Determine overall sentiment
+            if buy_count > sell_count:
+                sentiment = "Bullish"
+            elif sell_count > buy_count:
+                sentiment = "Bearish"
+            else:
+                sentiment = "Neutral"
+            
             company_data.append({
                 "symbol": company.symbol,
                 "date": latest_indicator.date.strftime("%Y-%m-%d"),
-                "signals": signals
+                "signals": signals,
+                "sentiment": sentiment  # Add sentiment to the response
             })
-
+    
     return jsonify(company_data)
 
 
-
-# Indicator values from database route
+# Indicator values from database route (core ?debug=true)
 @app.route('/api/indicators', methods=['GET'])
 def get_latest_indicators():
-    # Get the latest date for each stock symbol
     latest_dates = db.session.query(
         IndicatorValues.stock_symbol,
         func.max(IndicatorValues.date).label("latest_date")
     ).group_by(IndicatorValues.stock_symbol).subquery()
 
-    # Get the latest indicator values for each stock symbol
     latest_indicators = db.session.query(
         IndicatorValues.stock_symbol,
         IndicatorValues.date,
@@ -93,33 +227,80 @@ def get_latest_indicators():
         (IndicatorValues.date == latest_dates.c.latest_date)
     ).all()
 
-    # Convert query result to JSON format
     indicators_data = [
         {
             "symbol": ind.stock_symbol,
             "date": ind.date.strftime('%Y-%m-%d'),
-            "RSI": ind.rsi,
-            "SMA": ind.sma,
-            "OBV": ind.obv,
-            "ADX": ind.adx,
-            "Momentum": ind.momentum
+            "signals": {
+                "RSI": round(ind.rsi, 2),  # Round to 2 significant digits
+                "SMA": round(ind.sma, 2),
+                "OBV": round(ind.obv, 2),
+                "ADX": round(ind.adx, 2),
+                "Momentum": round(ind.momentum, 2)
+            }
         }
         for ind in latest_indicators
     ]
 
+
     return jsonify(indicators_data)
 
 
-# Company page route
-@app.route('/company')
-def company():
-    return render_template('company.html')
-# @app.route('/company/<symbol>')
-# def company_page(symbol):
-#     company = Stock.query.filter_by(symbol=symbol).first()
-#     if not company:
-#         return "Company not found", 404
-#     return render_template('company.html', company=company)
+# Company page HTML route
+@app.route('/company/<symbol>')
+def company_page(symbol):
+    return render_template('company.html', symbol=symbol)
+
+
+# API route to fetch company data
+@app.route('/api/company/<symbol>/data')
+def company_data_api(symbol):
+    # Fetch stock price data for the last 3 months
+    one_year_ago = datetime.now() - timedelta(days=90)
+    stock_prices = StockPrice.query.filter(
+        StockPrice.stock_symbol == symbol,
+        StockPrice.date >= one_year_ago
+    ).order_by(StockPrice.date.asc()).all()
+    
+    # Fetch indicator values for the last 3 months
+    indicator_values = IndicatorValues.query.filter(
+        IndicatorValues.stock_symbol == symbol,
+        IndicatorValues.date >= one_year_ago
+    ).order_by(IndicatorValues.date.asc()).all()
+    
+    # Prepare stock price data
+    stock_data = [{
+        'date': price.date.strftime('%Y-%m-%d'),
+        'open': price.open_price,
+        'close': price.close_price,
+        'high': price.high,
+        'low': price.low,
+        'volume': price.volume
+    } for price in stock_prices]
+
+    # Prepare indicator data with signals
+    indicator_data = []
+    for value in indicator_values:
+        indicator_data.append({
+            'date': value.date.strftime('%Y-%m-%d'),
+            'rsi': value.rsi,
+            'sma': value.sma,
+            'obv': value.obv,
+            'adx': value.adx,
+            'momentum': value.momentum,
+            'signals': {
+                "RSI": "Buy" if value.rsi < 30 else "Sell" if value.rsi > 70 else "Hold",
+                "ADX": "Strong Trend" if value.adx > 25 else "Weak Trend",
+                "Momentum": "Buy" if value.momentum > 0 else "Sell",
+                "SMA": "Buy" if value.sma > 50 else "Sell",
+                "OBV": "Buy" if value.obv > 0 else "Sell"
+            }
+        })
+
+    return jsonify({
+        'stock_data': stock_data,
+        'indicator_data': indicator_data
+    })
 
 
 # Register route

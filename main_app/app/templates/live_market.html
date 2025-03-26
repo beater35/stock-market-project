@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Live Market Signals</title>
+<link rel="stylesheet" href="{{ url_for ('static', filename='css/live_market.css') }}">
+</head>
+<body>
+<h1 class="accent">Live Market</h1>
+
+<div class="filter-tabs">
+    <button class="filter-tab active" data-filter="all">All Stocks</button>
+    <button class="filter-tab" data-filter="bullish">Bullish</button>
+    <button class="filter-tab" data-filter="bearish">Bearish</button>
+    <div class="stocks-count">Showing <span id="stocksCount">0</span> stocks</div>
+</div>
+
+<table id="indicatorsTable">
+    <thead>
+    <tr>
+        <th>S.No</th>
+        <th>Company</th>
+        <th>Date</th>
+        <th>Time</th>
+        <th>RSI</th>
+        <th>SMA</th>
+        <th>OBV</th>
+        <th>ADX</th>
+        <th>Momentum</th>
+        <th>Sentiment</th>
+        <th>Actions</th>
+    </tr>
+    </thead>
+    <tbody>
+    <!-- Rows will be populated dynamically -->
+    </tbody>
+</table>
+<script src="{{ url_for('static', filename='js/live_market.js') }}"></script>
+</body>
+</html>

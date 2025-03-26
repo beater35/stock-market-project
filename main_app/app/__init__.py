@@ -55,13 +55,13 @@ def scrape_stock_data():
     with app.app_context():  
         now = datetime.now()
 
-        if now.weekday() in [1, 4, 5]:
+        if now.weekday() in [4, 5]:
             print("Market is closed today. Skipping scraping.")
             return
         
-        if now.hour < 15 or (now.hour == 15 and now.minute < 15):
-            print("Market is still open. Waiting until after 3:15 PM.")
-            return
+        # if now.hour < 15 or (now.hour == 15 and now.minute < 15):
+        #     print("Market is still open. Waiting until after 3:15 PM.")
+        #     return
 
         print(f"Running scrape task at {now}...")
         try:
@@ -78,7 +78,7 @@ scheduler.add_job(
     days=1,
     id="daily_scraper",
     replace_existing=True,
-    # next_run_time=datetime.now()
+    next_run_time=datetime.now()
 )
 
 scheduler.start()
@@ -92,3 +92,13 @@ def shutdown_scheduler(exception=None):
 
 from app.routes import *
 
+# Import and start the live market scheduler
+from app.live_market.scheduler import start_scheduler
+start_scheduler()
+
+
+
+
+
+if __name__ == "__main__":
+    app.run(host="0.0.0.0", port=5000)
