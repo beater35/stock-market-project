@@ -7,7 +7,7 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy.sql import func
 from datetime import datetime, timedelta
 # from app.email_service import send_reset_email, s
-from app.models import User, Stock, IndicatorValues, StockPrice, LiveIndicatorValue
+from app.models import User, Stock, IndicatorValues, StockPrice, LiveIndicatorValue, LiveStockPrice
 
 
 # Live market page route
@@ -40,41 +40,48 @@ def get_buy_sell_signals():
         latest_timestamps.c.max_date
     ).subquery('latest_times')
 
-    latest_records = db.session.query(LiveIndicatorValue).join(
+    # Modified query to properly join with LiveStockPrice
+    latest_records = db.session.query(
+        LiveIndicatorValue,
+        LiveStockPrice.price.label('ltp')
+    ).join(
         latest_times,
         db.and_(
             LiveIndicatorValue.stock_symbol == latest_times.c.stock_symbol,
             LiveIndicatorValue.date == latest_times.c.max_date,
             LiveIndicatorValue.time == latest_times.c.max_time
         )
-    ).all()
+    ).join(
+        LiveStockPrice,
+        db.and_(
+            LiveStockPrice.stock_symbol == LiveIndicatorValue.stock_symbol,
+            LiveStockPrice.date == LiveIndicatorValue.date,
+            LiveStockPrice.time == LiveIndicatorValue.time
+        )
+    ).order_by(LiveStockPrice.time.desc()).all()
 
     result = {}
-    for record in latest_records:
+    for record, ltp in latest_records:  # Now we get both the record and the price
         key = f"{record.stock_symbol}_{record.date}_{record.time}"
         if key not in result:
             result[key] = {
                 "stock_symbol": record.stock_symbol,
                 "date": record.date.isoformat(),
-                "time": record.time.strftime("%H:%M:%S")
+                "time": record.time.strftime("%H:%M:%S"),
+                "ltp": ltp  # Using the joined price value
             }
 
-        # Calculate buy/sell signal based on standard thresholds for each indicator
+        # Rest of your indicator logic remains the same
         if record.indicator_name == 'RSI':
             result[key]["RSI"] = "Buy" if record.value < 30 else "Sell" if record.value > 70 else "Hold"
-        
         elif record.indicator_name == 'ADX':
             result[key]["ADX"] = "Strong Trend" if record.value > 25 else "Weak Trend"
-        
         elif record.indicator_name == 'Momentum':
-            result[key]["Momentum"] = "Buy" if record.value > 0 else "Sell"  # Standard momentum interpretation (buy > 0, sell < 0)
-        
+            result[key]["Momentum"] = "Buy" if record.value > 0 else "Sell"
         elif record.indicator_name == 'SMA':
-            # Assuming you have a logic for SMA (e.g., comparing short-term and long-term SMAs)
-            result[key]["SMA"] = "Buy" if record.value > 50 else "Sell"  # Example threshold (change as needed)
-        
+            result[key]["SMA"] = "Buy" if record.value > 50 else "Sell"
         elif record.indicator_name == 'OBV':
-            result[key]["OBV"] = "Buy" if record.value > 0 else "Sell"  # Simple OBV buy/sell logic
+            result[key]["OBV"] = "Buy" if record.value > 0 else "Sell"
 
     return jsonify(list(result.values()))
 
@@ -174,6 +181,14 @@ def get_companies():
             .order_by(IndicatorValues.date.desc())  # Get the latest entry
             .first()
         )
+
+        # Fetch the latest closing price (LTP) for the company
+        latest_stock_price = (
+            StockPrice.query
+            .filter_by(stock_symbol=company.symbol)
+            .order_by(StockPrice.date.desc())  # Get the latest entry
+            .first()
+        )
         
         if latest_indicator:
             signals = {
@@ -199,6 +214,7 @@ def get_companies():
             company_data.append({
                 "symbol": company.symbol,
                 "date": latest_indicator.date.strftime("%Y-%m-%d"),
+                "close_price": latest_stock_price.close_price,
                 "signals": signals,
                 "sentiment": sentiment  # Add sentiment to the response
             })

@@ -35,11 +35,50 @@ document.addEventListener("DOMContentLoaded", function () {
                 // Render the active filter
                 const activeFilter = document.querySelector('.filter-tab.active').dataset.filter;
                 applyFilter(activeFilter);
+
+                updateTimestamp();
                 
                 console.log("Data refreshed:", new Date().toLocaleTimeString());
             })
             .catch(error => console.error("Error loading market data:", error));
     }
+    
+    async function updateTimestamp() {
+        try {
+            const response = await fetch('/api/live-signals');
+            const data = await response.json();
+    
+            if (data.length === 0) {
+                console.error("No live signals data available.");
+                return;
+            }
+    
+            // Extract date and time from the first available stock entry
+            const firstRecord = data[0]; 
+    
+            // Update date display
+            const dateDisplay = document.getElementById("date-display");
+            if (dateDisplay) {
+                const date = new Date(firstRecord.date);
+                dateDisplay.textContent = date.toLocaleDateString('en-US', { month: 'long', day: 'numeric' });
+            }
+    
+            // Update time display
+            const timeDisplay = document.getElementById("time-display");
+            if (timeDisplay) {
+                timeDisplay.textContent = firstRecord.time; 
+            }
+    
+        } catch (error) {
+            console.error("Error fetching live signals:", error);
+        }
+    }
+    
+    // Call the function when the page loads
+    updateTimestamp();    
+    
+    // Call the function when the page loads
+    window.onload = updateTimestamp;
     
     // Calculate sentiment based on indicator signals
     function calculateSentiment(data) {
@@ -93,40 +132,12 @@ document.addEventListener("DOMContentLoaded", function () {
             link.textContent = record.stock_symbol;
             symbolCell.appendChild(link);
             row.appendChild(symbolCell);
-            
-            // Date Column
-            const dateCell = document.createElement("td");
-            dateCell.textContent = record.date || "N/A";
-            row.appendChild(dateCell);
-            
-            // Time Column
-            const timeCell = document.createElement("td");
-            timeCell.classList.add("time-cell");
 
-            const timeIcon = document.createElement("div");
-            timeIcon.classList.add("time-icon");
-            timeIcon.innerHTML = `
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
-            <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z"/>
-            <path d="M8 4.5a.5.5 0 0 1 .5.5v4a.5.5 0 0 1-.5.5H4.5a.5.5 0 0 1 0-1h3V5a.5.5 0 0 1 .5-.5z"/>
-            </svg>
-            `;
+            // LTP (Last Traded Price)
+            const ltpCell = document.createElement("td");
+            ltpCell.textContent = record.ltp;  
+            row.appendChild(ltpCell);
 
-            const timeText = document.createElement("span");
-            timeText.classList.add("time-text");
-
-            // Format time to remove seconds
-            const formatTime = (timeString) => {
-                if (!timeString) return "N/A";
-                return timeString.slice(0, 5); // HH:MM format
-            };
-
-            timeText.textContent = formatTime(record.time);
-
-            timeCell.appendChild(timeIcon);
-            timeCell.appendChild(timeText);
-            row.appendChild(timeCell);
-            
             // Technical Indicator Signals
             const indicatorsList = ["RSI", "SMA", "OBV", "ADX", "Momentum"];
             indicatorsList.forEach(indicator => {

@@ -14,6 +14,7 @@ document.addEventListener("DOMContentLoaded", function () {
             renderTable(allCompanies);
             setupFilters();
             updateStocksCount(allCompanies.length);
+            updateLastUpdatedDate(allCompanies);
         })
         .catch(error => console.error("Error loading data:", error));
     
@@ -37,11 +38,11 @@ document.addEventListener("DOMContentLoaded", function () {
             link.textContent = company.symbol;
             symbolCell.appendChild(link);
             row.appendChild(symbolCell);
-            
-            // Date Column
-            const dateCell = document.createElement("td");
-            dateCell.textContent = company.date || "N/A";
-            row.appendChild(dateCell);
+
+            // Closing Price Column
+            const closePriceCell = document.createElement("td");
+            closePriceCell.textContent = company.close_price || "N/A";  
+            row.appendChild(closePriceCell);
             
             // Technical Indicator Signals
             const indicatorsList = ["RSI", "SMA", "OBV", "ADX", "Momentum"];
@@ -148,5 +149,22 @@ document.addEventListener("DOMContentLoaded", function () {
     // Update the stocks count display
     function updateStocksCount(count) {
         document.getElementById('stocksCount').textContent = count;
+    }
+    
+    function updateLastUpdatedDate(companies) {
+        // Find the most recent date from the companies (assuming dates are in "YYYY-MM-DD" format)
+        const dates = companies.map(company => company.date).filter(date => date);
+        const latestDate = new Date(Math.max(...dates.map(date => new Date(date).getTime())));
+    
+        // Format the date
+        const formattedDate = latestDate.toLocaleDateString('en-US', {
+            weekday: 'long', 
+            year: 'numeric', 
+            month: 'long', 
+            day: 'numeric'
+        });
+    
+        // Update the last updated text
+        document.getElementById('lastUpdated').textContent = formattedDate;
     }
 });

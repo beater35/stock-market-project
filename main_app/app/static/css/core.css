@@ -129,7 +129,6 @@ a:hover::after {
   content: "↘ ";
 }
 
-/* Add to your existing CSS */
 
 /* Filter Tabs */
 .filter-tabs {
@@ -274,3 +273,5 @@ a:hover::after {
   50% { transform: scale(1.5); opacity: 0.1; }
   100% { transform: scale(1); opacity: 0.3; }
 }
+
+

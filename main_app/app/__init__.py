@@ -59,9 +59,9 @@ def scrape_stock_data():
             print("Market is closed today. Skipping scraping.")
             return
         
-        # if now.hour < 15 or (now.hour == 15 and now.minute < 15):
-        #     print("Market is still open. Waiting until after 3:15 PM.")
-        #     return
+        if now.hour < 15 or (now.hour == 15 and now.minute < 15):
+            print("Market is still open. Waiting until after 3:15 PM.")
+            return
 
         print(f"Running scrape task at {now}...")
         try:
