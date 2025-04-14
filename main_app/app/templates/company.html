@@ -6,147 +6,248 @@
     <title>Company Analysis</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/company.css') }}">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-chart-financial"></script>
+    
+    <script src="https://cdn.jsdelivr.net/npm/luxon@1.26.0"></script>
+	<script src="https://cdn.jsdelivr.net/npm/chart.js@3.0.1/dist/chart.js"></script>
+	<script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-luxon@1.0.0"></script>
+    
 </head>
 <body>
     <div class="container">
-    <div class="header">
-        <a href="{{ url_for('core') }}" class="back-link">
-        <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
-        </svg>
-        Back to Dashboard
-        </a>
-    </div>
-    
-    <div class="stock-header">
-        <div class="stock-info">
-        <h1 class="stock-title">AAPL</h1>
-        <span class="bullish-pill">Bullish</span>
-        <div class="last-updated">
-            <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-            </svg>
-            Last updated: 2023-08-15
+        <a href="{{ url_for('static', filename='core.html') }}" class="back-button">← Back to Stock List</a>
+        
+        <header>
+            <div class="header-content">
+                <div>
+                    <span class="company-name">Apple</span>
+                    <span class="company-symbol">AAPL</span>
+                    <div class="date-updated">Last updated on: Friday, April 12, 2025</div>
+                </div>
+                <div class="company-sector">Technology / Consumer Electronics</div>
+            </div>
+        </header>
+        
+        <!-- Stock Price Overview -->
+        <div class="card">
+            <h2 class="card-title">Stock Price Overview</h2>
+            <div class="price-overview">
+                <div class="price-item">
+                    <span class="price-label">Current Price</span>
+                    <span class="price-value current-price">$174.82</span>
+                </div>
+                <div class="price-item">
+                    <span class="price-label">Previous Close</span>
+                    <span class="price-value previous-close">$172.40</span>
+                </div>
+                <div class="price-item">
+                    <span class="price-label">Price Change</span>
+                    <span class="price-value price-change price-up">+$2.42 (+1.40%)</span>
+                </div>
+                <div class="price-item">
+                    <span class="price-label">90-Days High</span>
+                    <span class="price-value high-52week">$198.23</span>
+                </div>
+                <div class="price-item">
+                    <span class="price-label">90-Days Low</span>
+                    <span class="price-value low-52week">$152.16</span>
+                </div>
+                <div class="price-item">
+                    <span class="price-label">Volume</span>
+                    <span class="price-value volume">57.2M</span>
+                </div>
+            </div>
         </div>
-        </div>
-        <div class="action-buttons">
-        <button class="btn btn-secondary">
-            <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
-            </svg>
-            Historical Data
-        </button>
-        <button class="btn btn-primary">
-            <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
-            </svg>
-            External Analysis
-        </button>
-        </div>
-    </div>
-    
-    <div class="dashboard">
-        <div class="main-content">
+
+        
+        <!-- Price Chart -->
         <div class="card">
             <h2 class="card-title">Price Chart</h2>
-            <div class="price-chart">
-            <svg viewBox="0 0 400 200" width="100%" height="100%">
-                <path d="M0,150 C20,130 40,160 60,140 C80,120 100,140 120,130 C140,120 160,100 180,90 C200,80 220,60 240,70 C260,80 280,50 300,40 C320,30 340,50 360,40 C380,30 400,40 400,50" class="chart-line"></path>
-            </svg>
+            <div class="tabs">
+                <div class="tab active">90 Days</div>
+                <div class="tab">60 Days</div>
+                <div class="tab">30 Days</div>
+            </div>
+            <div class="chart-container" style="height: 400px; position: relative;">
+                <canvas id="priceChart" style="height: 80%; width: 100%;"></canvas>
+                <canvas id="volumeChart" style="height: 20%; width: 100%; margin-top: -40px;"></canvas>
+            </div>
+                        
+        </div>
+        
+        <!-- Technical Indicators -->
+        <div class="card">
+            <h2 class="card-title">Technical Indicator Analysis</h2>
+            
+            <!-- RSI Indicator -->
+            <div class="indicator-section">
+                <div class="indicator-header">
+                    <div class="indicator-name" id="">RSI (Relative Strength Index)</div>
+                    <div class="indicator-value">63.8</div>
+                </div>
+                <div class="chart-container indicator-chart">
+                    <canvas id="rsiChart" width="1100" height="600"></canvas>
+                </div>                
+                <div class="indicator-summary" id="rsi-summary">
+                </div>
+                <div class="indicator-description">
+                    RSI measures the speed and change of price movements. Values below 30 indicate oversold conditions (buy signal), while values above 70 indicate overbought conditions (sell signal).
+                    The RSI is trending upward and currently at 63.8, suggesting the asset is approaching overbought territory but remains in neutral range.
+                </div>
+                <div class="indicator-signal">
+                    <span>Signal:</span>
+                    <span class="signal-badge signal-hold">Hold</span>
+                </div>
+            </div>
+            
+            
+            <!-- SMA Indicator -->
+            <div class="indicator-section">
+                <div class="indicator-header">
+                    <div class="indicator-name">SMA (Simple Moving Average)</div>
+                    <div class="indicator-value">Price/SMA20 Cross</div>
+                </div>
+                <div class="chart-container indicator-chart">
+                    <canvas id="smaChart" width="1100" height="250"></canvas>
+                </div>                
+                <div class="indicator-summary" id="sma-summary">
+                </div>
+                <div class="indicator-description">
+                    The Simple Moving Average (SMA) is used to identify trend direction. When the shorter-term SMA (50-day) crosses above the longer-term SMA (200-day), it generates a "golden cross" buy signal. When it crosses below, it creates a "death cross" sell signal.
+                    Currently, the 50-day SMA is above the 200-day SMA, indicating a bullish trend in place.
+                </div>
+                <div class="indicator-signal">
+                    <span>Signal:</span>
+                    <span class="signal-badge signal-sell">Sell</span>
+                </div>
+            </div>
+            
+            <!-- OBV Indicator -->
+            <div class="indicator-section">
+                <div class="indicator-header">
+                    <div class="indicator-name">OBV (On-Balance Volume)</div>
+                    <div class="indicator-value">Rising</div>
+                </div>
+                <div class="chart-container indicator-chart">
+                    <canvas id="obvChart" width="1100" height="250"></canvas>
+                </div>                
+                <div class="indicator-summary" id="obv-summary">
+                </div>
+                <div class="indicator-description">
+                    On-Balance Volume (OBV) measures buying and selling pressure by adding volume on up days and subtracting it on down days. When OBV is rising while prices are also rising, it confirms the uptrend. A divergence between OBV and price can signal a potential reversal.
+                    Currently, OBV is showing strong buying pressure with a steady upward trend, confirming the price movement.
+                </div>
+                <div class="indicator-signal">
+                    <span>Signal:</span>
+                    <span class="signal-badge signal-buy">Buy</span>
+                </div>
+            </div>
+            
+            <!-- ADX Indicator -->
+            <div class="indicator-section">
+                <div class="indicator-header">
+                    <div class="indicator-name">ADX (Average Directional Index)</div>
+                    <div class="indicator-value">28.5</div>
+                </div>
+                <div class="chart-container indicator-chart">
+                    <canvas id="adxChart" width="1100" height="250"></canvas>
+                </div>                
+                <div class="indicator-summary" id="adx-summary">
+                </div>
+                <div class="indicator-description">
+                    ADX measures the strength of a trend, regardless of its direction. Values below 20 indicate a weak trend or ranging market, while values above 25 indicate a strong trend. It does not indicate trend direction, only strength.
+                    The current ADX reading of 28.5 suggests a strong trend is in place, which makes trend-following strategies more reliable.
+                </div>
+                <div class="indicator-signal">
+                    <span>Signal:</span>
+                    <span class="signal-badge signal-weak-trend">Weak Trend</span>
+                </div>
+            </div>
+            
+            <!-- Momentum Indicator -->
+            <div class="indicator-section">
+                <div class="indicator-header">
+                    <div class="indicator-name">Momentum</div>
+                    <div class="indicator-value">+4.2%</div>
+                </div>
+                <div class="chart-container indicator-chart">
+                    <canvas id="momentumChart" width="1100" height="400"></canvas>
+                </div>                
+                <div class="indicator-summary" id="momentum-summary">
+                </div>
+                <div class="indicator-description">
+                    Momentum measures the rate of change in price over a specified period. Positive values indicate upward momentum, while negative values indicate downward momentum. Changes in momentum can signal potential trend reversals.
+                    The momentum indicator shows +4.2%, indicating positive price acceleration and continued bullish sentiment.
+                </div>
+                <div class="indicator-signal">
+                    <span>Signal:</span>
+                    <span class="signal-badge signal-buy">Buy</span>
+                </div>
             </div>
         </div>
         
+        <!-- Final Signal Summary -->
         <div class="card">
-            <h2 class="card-title">Technical Indicators Analysis</h2>
-            <div class="tab-group">
-            <div class="tab active">All Signals</div>
-            <div class="tab">Buy (4)</div>
-            <div class="tab">Sell (0)</div>
-            <div class="tab">Other</div>
-            </div>
-            
-            <div class="indicator">
-            <div class="indicator-header">
-                <div class="indicator-title">
-                RSI
-                <span class="indicator-info">i</span>
+            <h2 class="card-title">Final Signal Summary</h2>
+            <div class="final-signal">
+                <div class="signal-title">Combined Signal Strength</div>
+                <div class="signal-strength strength-buy">BUY</div>
+                
+                <div class="signals-summary">
+                    <div class="summary-item">
+                        <div class="summary-badge badge-positive">2</div>
+                        <span>Buy</span>
+                    </div>
+                    <div class="summary-item">
+                        <div class="summary-badge badge-negative">1</div>
+                        <span>Sell</span>
+                    </div>
+                    <div class="summary-item">
+                        <div class="summary-badge badge-neutral">1</div>
+                        <span>Hold</span>
+                    </div>
                 </div>
-                <div class="indicator-signal buy-signal">
-                <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 10l7-7m0 0l7 7m-7-7v18"></path>
-                </svg>
-                Buy
+                
+                <div class="confidence-meter">
+                    <div class="confidence-level"></div>
                 </div>
+                <div class="confidence-text">75% Confidence</div>
             </div>
-            <div class="toggle-details">- Hide details</div>
-            <div class="indicator-description">
-                The RSI is below 30, indicating an oversold condition. This is traditionally seen as a buying opportunity.
-            </div>
-            </div>
-            
-            <div class="indicator">
-            <div class="indicator-header">
-                <div class="indicator-title">
-                ADX
-                <span class="indicator-info">i</span>
-                </div>
-                <div class="indicator-signal trend-signal">
-                <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path>
-                </svg>
-                Strong Trend
-                </div>
-            </div>
-            <div class="toggle-details">+ Show details</div>
-            </div>
-            
-            <div class="indicator">
-            <div class="indicator-header">
-                <div class="indicator-title">
-                Momentum
-                <span class="indicator-info">i</span>
-                </div>
-                <div class="indicator-signal buy-signal">
-                <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 10l7-7m0 0l7 7m-7-7v18"></path>
-                </svg>
-                Buy
-                </div>
-            </div>
-            <div class="toggle-details">+ Show details</div>
-            </div>
-        </div>
         </div>
         
-        <div class="sidebar">
+        <!-- Performance Evaluation -->
         <div class="card">
-            <h2 class="card-title">Signal Summary</h2>
-            <div class="signal-list">
-            <div class="signal-item">
-                <div>Buy Signals:</div>
-                <div class="signal-count count-blue">4</div>
+            <h2 class="card-title">Performance Evaluation</h2>
+            <div class="chart-container indicator-chart">
+                <img src="" alt="Performance Chart" style="width: 100%; height: 100%; object-fit: cover;">
+                <p style="text-align: center; color: #777;">Cumulative Return Chart (Strategy vs. Market)</p>
             </div>
-            <div class="signal-item">
-                <div>Sell Signals:</div>
-                <div class="signal-count count-red">0</div>
+            <div class="performance-grid">
+                <div class="performance-item">
+                    <div class="performance-label">Model Accuracy</div>
+                    <div class="performance-value">TBD</div>
+                </div>
+                <div class="performance-item">
+                    <div class="performance-label">Sharpe Ratio</div>
+                    <div class="performance-value">TBD</div>
+                </div>
+                <div class="performance-item">
+                    <div class="performance-label">Win Rate</div>
+                    <div class="performance-value">TBD</div>
+                </div>
+                <div class="performance-item">
+                    <div class="performance-label">Max Drawdown</div>
+                    <div class="performance-value">TBD</div>
+                </div>
+                <div class="performance-item">
+                    <div class="performance-label">Avg Holding Period</div>
+                    <div class="performance-value">TBD</div>
+                </div>
             </div>
-            <div class="signal-item">
-                <div>Other Signals:</div>
-                <div class="signal-count count-gray">1</div>
-            </div>
-            </div>
-            
-            <div class="sentiment">
-            <div>Overall Sentiment:</div>
-            <span class="bullish-pill" style="margin-left: 10px;">Bullish</span>
-            </div>
-            
-            <button class="full-width-btn btn-primary">Add to Watchlist</button>
-            <button class="full-width-btn btn-secondary">Export Analysis</button>
-        </div>
         </div>
     </div>
-    </div>
+    
+    <script src="{{ url_for('static', filename='js/configIndicator.js') }}"></script>
     <script src="{{ url_for('static', filename='js/company.js') }}"></script>
 </body>    
 </html>

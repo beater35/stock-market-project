@@ -5,7 +5,7 @@ document.addEventListener("DOMContentLoaded", function () {
     fetchLiveData();
     
     // Set up auto-refresh every 60 seconds
-    setInterval(fetchLiveData, 60000);
+    setInterval(fetchLiveData, 300000);
     
     function fetchLiveData() {
         // Check if debug mode is enabled in URL
@@ -27,6 +27,8 @@ document.addEventListener("DOMContentLoaded", function () {
                     // In normal mode, calculate sentiment based on Buy/Sell signals
                     calculateSentiment(allMarketData);
                 }
+
+                console.log(allMarketData)
                 
                 // Sort by symbol
                 allMarketData.sort((a, b) => 

@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Company Technical Indicators</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/core.css') }}">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
     <h1>Stock Analysis Dashboard</h1>
@@ -14,16 +15,50 @@
     </div>
     <br>
 
-    <a href="/live-market" target="_blank" class="live-data-btn">
+    <!-- <a href="/live-market" target="_blank" class="live-data-btn">
         <span class="pulse-dot"></span>
         <span class="btn-text">View Live Market Indicators</span>
         <span class="arrow-icon">→</span>
-    </a>
+    </a> -->
     
-    <div class="filter-tabs">
+    <div class="filter-container">
+        <div class="filter-main">
         <button class="filter-tab active" data-filter="all">All Stocks</button>
-        <button class="filter-tab" data-filter="bullish">Bullish</button>
-        <button class="filter-tab" data-filter="bearish">Bearish</button>
+        <div class="filter-dropdown">
+            <button class="filter-dropdown-btn">Filter by Indicator <span class="arrow-down">▼</span></button>
+            <div class="dropdown-content">
+            <div class="dropdown-section">
+                <div class="dropdown-header">RSI</div>
+                <button class="filter-option" data-filter="rsi-buy">Buy</button>
+                <button class="filter-option" data-filter="rsi-sell">Sell</button>
+                <button class="filter-option" data-filter="rsi-hold">Hold</button>
+            </div>
+            <div class="dropdown-section">
+                <div class="dropdown-header">SMA</div>
+                <button class="filter-option" data-filter="sma-buy">Buy</button>
+                <button class="filter-option" data-filter="sma-sell">Sell</button>
+            </div>
+            <div class="dropdown-section">
+                <div class="dropdown-header">OBV</div>
+                <button class="filter-option" data-filter="obv-buy">Buy</button>
+                <button class="filter-option" data-filter="obv-sell">Sell</button>
+            </div>
+            <div class="dropdown-section">
+                <div class="dropdown-header">ADX</div>
+                <button class="filter-option" data-filter="adx-strong">Strong Trend</button>
+                <button class="filter-option" data-filter="adx-weak">Weak Trend</button>
+            </div>
+            <div class="dropdown-section">
+                <div class="dropdown-header">Momentum</div>
+                <button class="filter-option" data-filter="momentum-buy">Buy</button>
+                <button class="filter-option" data-filter="momentum-sell">Sell</button>
+            </div>
+            </div>
+        </div>
+        <div class="active-filters" id="activeFilters">
+            <!-- Active filters will appear here -->
+        </div>
+        </div>
         <div class="stocks-count">Showing <span id="stocksCount">0</span> stocks</div>
     </div>
     
@@ -38,7 +73,7 @@
                 <th>OBV</th>
                 <th>ADX</th>
                 <th>Momentum</th>
-                <th>Sentiment</th>
+                <th>Signals Summary</th>
                 <th>Actions</th>
             </tr>
         </thead>
@@ -46,6 +81,29 @@
             <!-- Rows will be populated by JavaScript -->
         </tbody>
     </table>
-    <script src="{{ url_for('static', filename='js/core.js') }}"></script>
+
+    <div id="popupModal" class="modal" style="display:none;">
+        <div class="modal-content">
+        <span class="close">&times;</span>
+        <h3 id="popupTitle">Indicator Details</h3>
+        
+        <div class="indicator-description">
+            <p id="indicatorDescription"></p>
+        </div>
+        
+        <div class="chart-container">
+            <h4 class="section-title">Chart Visualization</h4>
+            <p class="chart-subtitle" id="chartSubtitle"></p>
+            <canvas id="indicatorChart" width="400" height="200"></canvas>
+        </div>
+        
+        <div class="signal-container" id="signalContainer">
+            <h4 class="signal-title">Current Signal: <span id="signalType"></span></h4>
+            <p id="explanationText" class="signal-explanation"></p>
+        </div>
+        </div>
+    </div>
+
+    <script type="module" src="{{ url_for('static', filename='js/core.js') }}"></script>
 </body>
 </html>

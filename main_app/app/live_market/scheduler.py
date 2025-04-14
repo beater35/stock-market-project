@@ -18,15 +18,22 @@ logging.basicConfig(
 
 def scheduled_live_update():
     """Fetch live stock data and then calculate & store live indicators."""
+    now = datetime.now()
+    day_of_week = now.weekday()
 
     now = datetime.now()
     if now.hour < 11 or now.hour >= 15:  # Stop after 3:00 PM
         print("Market is closed. Stopping live updates.")
         return
+    
+    if day_of_week == 4 or day_of_week == 5:  # Friday (4) or Saturday (5)
+        print("Market is closed (Friday or Saturday). Stopping live updates.")
+        return
 
     with app.app_context():
-        scrape_and_store_live()  # Scrape & store live market data
-        update_live_indicators()  # Calculate indicators after data is updated
+        # scrape_and_store_live()  # Scrape & store live market data
+        # update_live_indicators()  # Calculate indicators after data is updated
+        return
 
 def cleanup_old_data():
     """Deletes live stock prices and indicator values older than 10 days."""

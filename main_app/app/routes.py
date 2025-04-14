@@ -179,7 +179,8 @@ def get_companies():
             IndicatorValues.query
             .filter_by(stock_symbol=company.symbol)
             .order_by(IndicatorValues.date.desc())  # Get the latest entry
-            .first()
+            .limit(2)
+            .all()
         )
 
         # Fetch the latest closing price (LTP) for the company
@@ -187,37 +188,48 @@ def get_companies():
             StockPrice.query
             .filter_by(stock_symbol=company.symbol)
             .order_by(StockPrice.date.desc())  # Get the latest entry
-            .first()
+            .limit(2)
+            .all()
         )
+
+        if len(latest_indicator) >= 2 and len(latest_stock_price) >= 2:
+            current_obv = latest_indicator[0].obv
+            previous_obv = latest_indicator[1].obv
+            current_price = latest_stock_price[0].close_price
+            previous_price = latest_stock_price[1].close_price
+
+            # Determine OBV and Price Trends
+            obv_rising = current_obv > previous_obv
+            price_rising = current_price > previous_price
+
+            # OBV Buy/Sell Signal (Trend Confirmation)
+            obv_signal = "Buy" if (obv_rising and price_rising) else (
+                        "Sell" if (not obv_rising and not price_rising) else "Hold"
+            )
         
-        if latest_indicator:
-            signals = {
-                "RSI": "Buy" if latest_indicator.rsi < 30 else "Sell" if latest_indicator.rsi > 70 else "Hold",
-                "ADX": "Strong Trend" if latest_indicator.adx > 25 else "Weak Trend",
-                "Momentum": "Buy" if latest_indicator.momentum > 0 else "Sell",
-                "SMA": "Buy" if latest_indicator.sma > 50 else "Sell",
-                "OBV": "Buy" if latest_indicator.obv > 0 else "Sell"
-            }
-            
-            # Calculate sentiment based on signals
-            buy_count = sum(1 for signal in signals.values() if signal == "Buy")
-            sell_count = sum(1 for signal in signals.values() if signal == "Sell")
-            
-            # Determine overall sentiment
-            if buy_count > sell_count:
-                sentiment = "Bullish"
-            elif sell_count > buy_count:
-                sentiment = "Bearish"
-            else:
-                sentiment = "Neutral"
-            
-            company_data.append({
-                "symbol": company.symbol,
-                "date": latest_indicator.date.strftime("%Y-%m-%d"),
-                "close_price": latest_stock_price.close_price,
-                "signals": signals,
-                "sentiment": sentiment  # Add sentiment to the response
-            })
+        # Extract the latest values properly
+        latest = latest_indicator[0]
+        signals = {
+            "RSI": "Buy" if latest.rsi < 30 else "Sell" if latest.rsi > 70 else "Hold",
+            "ADX": "Strong Trend" if latest.adx > 25 else "Weak Trend",
+            "Momentum": "Buy" if latest.momentum > 0 else "Sell",
+            "SMA": "Buy" if latest.sma < current_price else "Sell",
+            "OBV": obv_signal
+        }
+
+        buy_count = sum(1 for signal in signals.values() if signal == "Buy")
+        sell_count = sum(1 for signal in signals.values() if signal == "Sell")
+        hold_count = sum(1 for signal in signals.values() if signal == "Hold")
+
+        signals_count = [buy_count, sell_count, hold_count]
+
+        company_data.append({
+            "symbol": company.symbol,
+            "date": latest.date.strftime("%Y-%m-%d"),
+            "close_price": current_price,
+            "signals": signals,
+            "signals_count": signals_count
+        })
     
     return jsonify(company_data)
 
@@ -271,19 +283,21 @@ def company_page(symbol):
 # API route to fetch company data
 @app.route('/api/company/<symbol>/data')
 def company_data_api(symbol):
-    # Fetch stock price data for the last 3 months
-    one_year_ago = datetime.now() - timedelta(days=90)
+    three_months = datetime.now() - timedelta(days=90)
+
+    # Keep in ascending order for charting
     stock_prices = StockPrice.query.filter(
         StockPrice.stock_symbol == symbol,
-        StockPrice.date >= one_year_ago
+        StockPrice.date >= three_months
     ).order_by(StockPrice.date.asc()).all()
-    
-    # Fetch indicator values for the last 3 months
+
     indicator_values = IndicatorValues.query.filter(
         IndicatorValues.stock_symbol == symbol,
-        IndicatorValues.date >= one_year_ago
+        IndicatorValues.date >= three_months
     ).order_by(IndicatorValues.date.asc()).all()
-    
+
+    company = Stock.query.filter(Stock.symbol == symbol).first()
+
     # Prepare stock price data
     stock_data = [{
         'date': price.date.strftime('%Y-%m-%d'),
@@ -291,32 +305,99 @@ def company_data_api(symbol):
         'close': price.close_price,
         'high': price.high,
         'low': price.low,
-        'volume': price.volume
+        'volume': price.volume,
+        'symbol': price.stock_symbol
     } for price in stock_prices]
 
-    # Prepare indicator data with signals
-    indicator_data = []
-    for value in indicator_values:
-        indicator_data.append({
-            'date': value.date.strftime('%Y-%m-%d'),
-            'rsi': value.rsi,
-            'sma': value.sma,
-            'obv': value.obv,
-            'adx': value.adx,
-            'momentum': value.momentum,
-            'signals': {
-                "RSI": "Buy" if value.rsi < 30 else "Sell" if value.rsi > 70 else "Hold",
-                "ADX": "Strong Trend" if value.adx > 25 else "Weak Trend",
-                "Momentum": "Buy" if value.momentum > 0 else "Sell",
-                "SMA": "Buy" if value.sma > 50 else "Sell",
-                "OBV": "Buy" if value.obv > 0 else "Sell"
-            }
-        })
+    # Prepare indicator data
+    indicator_data = [{
+        'date': value.date.strftime('%Y-%m-%d'),
+        'rsi': value.rsi,
+        'sma': value.sma,
+        'obv': value.obv,
+        'adx': value.adx,
+        'momentum': value.momentum
+    } for value in indicator_values]
+
+    # Signal logic (get last two items from ASC list)
+    signals = {}
+    if len(indicator_values) >= 2 and len(stock_prices) >= 2:
+        latest_indicator = indicator_values[-1]
+        prev_indicator = indicator_values[-2]
+        latest_price = stock_prices[-1]
+        prev_price = stock_prices[-2]
+
+        current_obv = latest_indicator.obv
+        previous_obv = prev_indicator.obv
+        current_price = latest_price.close_price
+        previous_price = prev_price.close_price
+
+        obv_rising = current_obv > previous_obv
+        price_rising = current_price > previous_price
+        obv_signal = "Buy" if (obv_rising and price_rising) else (
+            "Sell" if (not obv_rising and not price_rising) else "Hold"
+        )
+
+        signals = {
+            "RSI": "Buy" if latest_indicator.rsi < 30 else "Sell" if latest_indicator.rsi > 70 else "Hold",
+            "ADX": "Strong Trend" if latest_indicator.adx > 25 else "Weak Trend",
+            "Momentum": "Buy" if latest_indicator.momentum > 0 else "Sell",
+            "SMA": "Buy" if latest_indicator.sma < current_price else "Sell",
+            "OBV": obv_signal
+        }
+
+    company_data = {
+        'company_name': company.name if company else 'Unknown',
+        'symbol': symbol,
+        'sector': company.sector if company else 'Unknown'
+    }
 
     return jsonify({
         'stock_data': stock_data,
-        'indicator_data': indicator_data
+        'indicator_data': indicator_data,
+        'company_data': company_data,
+        'latest_signals': signals
     })
+
+
+
+# Indicator data route for pop up graph
+@app.route('/indicator_data/<string:symbol>/<string:indicator>', methods=['GET'])
+def get_indicator_data(symbol, indicator):
+    # Validate indicator name to avoid SQL injection or invalid columns
+    allowed_indicators = ['rsi', 'sma', 'obv', 'adx', 'momentum']
+    if indicator not in allowed_indicators:
+        return jsonify({'error': 'Invalid indicator'}), 400
+
+    try:
+        today = datetime.today().date()
+        start_date = today - timedelta(days=25)  # buffer to ensure at least 14 available days
+
+        # Query only the needed indicator and date
+        results = db.session.query(
+            IndicatorValues.date,
+            getattr(IndicatorValues, indicator)
+        ).filter(
+            IndicatorValues.stock_symbol == symbol,
+            IndicatorValues.date >= start_date
+        ).order_by(IndicatorValues.date).limit(14).all()
+
+        data = [{
+            'date': r.date.strftime('%Y-%m-%d'),
+            'value': r[1]
+        } for r in results if r[1] is not None]
+
+        latest_value = data[-1]['value'] if data else None
+
+        return jsonify({
+            'symbol': symbol,
+            'indicator': indicator,
+            'data': data,
+            'latest_value': latest_value
+        })
+
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
 
 
 # Register route

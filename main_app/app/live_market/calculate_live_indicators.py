@@ -26,7 +26,7 @@ def calculate_rsi(prices, period=14):
     """Calculate RSI using TA-Lib."""
     return talib.RSI(prices, timeperiod=period)[-1]
 
-def calculate_sma(prices, period=30):
+def calculate_sma(prices, period=20):
     """Calculate Simple Moving Average (SMA) using TA-Lib."""
     return talib.SMA(prices, timeperiod=period)[-1]
 
