@@ -18,7 +18,6 @@ document.addEventListener("DOMContentLoaded", () => {
             const latestSignals = data.latest_signals;
             const lastStock = stockData[stockData.length - 1];
 
-            // ---- HEADER DATE ----
             const lastDate = stockData.at(-1)?.date || new Date().toISOString().slice(0, 10);
             const formattedDate = new Date(lastDate).toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
             document.querySelector(".date-updated").textContent = `Last updated on: ${formattedDate}`;
@@ -26,17 +25,15 @@ document.addEventListener("DOMContentLoaded", () => {
             document.querySelector(".company-symbol").textContent = symbol;
             document.querySelector(".company-sector").textContent = companyData.sector || 'Unknown Sector';
 
-            // Extract values
-            const currentPrice = lastStock.close;  // Close price is considered the current price
-            const previousClose = stockData[stockData.length - 2]?.close || currentPrice; // Previous close price (use current if unavailable)
+            const currentPrice = lastStock.close;  
+            const previousClose = stockData[stockData.length - 2]?.close || currentPrice; 
             const priceChangeVal = currentPrice - previousClose;
             const priceChange = priceChangeVal.toFixed(2);
             const priceChangePercentage = ((priceChangeVal / previousClose) * 100).toFixed(2);
-            const high52Week = Math.max(...stockData.map(data => data.high)); // Maximum high for the 52-week period
-            const low52Week = Math.min(...stockData.map(data => data.low));  // Minimum low for the 52-week period
-            const volume = (lastStock.volume / 1_000).toFixed(2);  // Format volume as a string
+            const high52Week = Math.max(...stockData.map(data => data.high)); 
+            const low52Week = Math.min(...stockData.map(data => data.low));  
+            const volume = (lastStock.volume / 1_000).toFixed(2); 
 
-            // Fill in the HTML elements
             document.querySelector(".price-value.current-price").textContent = `${currentPrice.toFixed(2)}`;
             document.querySelector(".price-value.previous-close").textContent = `${previousClose.toFixed(2)}`;
             const sign = priceChangeVal >= 0 ? "+" : "";
@@ -53,23 +50,16 @@ document.addEventListener("DOMContentLoaded", () => {
                 document.querySelector(".price-value.price-change").classList.remove("price-up");
             }
 
-            // ---- PRICE CHART ----
 
-            // Function to load and display stock chart
             function renderPriceChart(stockData, period = 30) {
-                // Filter data based on selected period
                 const filteredData = filterDataByDateRange(stockData, period);
                 
-                // Get the chart canvas
                 const ctx = document.getElementById('priceChart').getContext('2d');
                 
-                // Clear previous chart if it exists
                 if (window.priceChart instanceof Chart) {
                     window.priceChart.destroy();
                 }
                 
-                // Prepare data
-
                 const labels = filteredData.map(d => {
                     return new Date(d.date || d.x).toLocaleDateString('en-US', {
                         year: 'numeric',
@@ -81,7 +71,6 @@ document.addEventListener("DOMContentLoaded", () => {
                 const closePrices = filteredData.map(data => data.close);
                 const volumeData = filteredData.map(data => data.volume);
 
-                // Create chart
                 window.priceChart = new Chart(ctx, {
                 type: 'line',
                 data: {
@@ -107,7 +96,7 @@ document.addEventListener("DOMContentLoaded", () => {
                     
                     plugins: {
                     legend: {
-                        display: false // Hide legend since we only have one dataset
+                        display: false 
                     },
                     tooltip: {
                         mode: 'index',
@@ -153,23 +142,21 @@ document.addEventListener("DOMContentLoaded", () => {
                 return window.priceChart;
             }
 
-            // Function to filter data by period (days)
             function filterDataByDateRange(data, months) {
                 if (!months) return data;
             
                 const cutoffDate = luxon.DateTime.now().minus({ months: months });
                 
                 return data.filter(d => {
-                    const entryDate = luxon.DateTime.fromISO(d.date || d.x); // handle 'x' if date key is 'x'
+                    const entryDate = luxon.DateTime.fromISO(d.date || d.x); 
                     return entryDate >= cutoffDate;
                 });
             }
             
 
-            // Setup period selector event listeners for tab elements
             function setupPeriodSelectors() {
                 const tabElements = document.querySelectorAll('.tabs .tab');
-                const periodsInMonths = [3, 2, 1]; // 1 month, 2 months, 3 months
+                const periodsInMonths = [3, 2, 1]; 
             
                 tabElements.forEach((tab, index) => {
                     tab.addEventListener('click', function () {
@@ -177,7 +164,7 @@ document.addEventListener("DOMContentLoaded", () => {
                         this.classList.add('active');
             
                         const filteredData = filterDataByDateRange(stockData, periodsInMonths[index]);
-                        renderPriceChart(filteredData); // Render with filtered data
+                        renderPriceChart(filteredData); 
                     });
                 });
             }
@@ -186,19 +173,18 @@ document.addEventListener("DOMContentLoaded", () => {
             renderPriceChart(stockData);
 
 
-            // ---- INDICATOR CHARTS + SIGNALS ----
             // RSI
             const lastIndicator = indicatorData[indicatorData.length - 1];
             const lastRSI = lastIndicator.rsi;
-            const rsiSignal = latestSignals.RSI;
+            const rsiSignal = latestSignals.RSI;            
             
-            const rsiConfig = indicatorConfig['rsi'];
+            const rsiConfig = indicatorConfigure['rsi'];
             
-            document.querySelector('.indicator-description').textContent = rsiConfig.description;
+            document.getElementById('indicator-description-rsi').textContent = rsiConfig.description;
             
             document.querySelector('.indicator-name').textContent = "RSI (Relative Strength Index)";
-            document.querySelector('.indicator-value').textContent = lastRSI.toFixed(1);
-            
+            document.getElementById('indicator-value-rsi').textContent = lastRSI.toFixed(1);            
+
             let rsiExplanation = "";
             for (let rule of rsiConfig.signalRules) {
                 if (rule.condition.length === 1 && typeof rule.condition(rsiSignal) === 'boolean') {
@@ -214,20 +200,20 @@ document.addEventListener("DOMContentLoaded", () => {
             
             document.getElementById("rsi-summary").textContent = rsiExplanation;
 
-            const rsiSignalBadge = document.querySelector('.indicator-signal .signal-badge');
+            const rsiBadge = document.getElementById('rsi-badge');
             if (rsiSignal === "Buy") {
-                rsiSignalBadge.textContent = "Buy";
-                rsiSignalBadge.className = "signal-badge signal-buy";
+                rsiBadge.textContent = "Buy";
+                rsiBadge.className = "signal-badge signal-buy";
             } else if (lastRSI === "Sell") {
-                rsiSignalBadge.textContent = "Sell";
-                rsiSignalBadge.className = "signal-badge signal-sell";
+                rsiBadge.textContent = "Sell";
+                rsiBadge.className = "signal-badge signal-sell";
             } else {
-                rsiSignalBadge.textContent = "Hold";
-                rsiSignalBadge.className = "signal-badge signal-hold";
+                rsiBadge.textContent = "Hold";
+                rsiBadge.className = "signal-badge signal-hold";
             }
 
-            const rsiLabels = stockData.map(data => data.date);  // Assuming stockData includes `date` in 'YYYY-MM-DD' format
-            const rsiValues = indicatorData.map(data => data.rsi);  // RSI values from indicatorData
+            const rsiLabels = stockData.map(data => data.date); 
+            const rsiValues = indicatorData.map(data => data.rsi); 
 
             const ctx = document.getElementById('rsiChart').getContext('2d');
             const rsiChart = new Chart(ctx, {
@@ -298,12 +284,10 @@ document.addEventListener("DOMContentLoaded", () => {
             const lastSMA = lastIndicator.sma;
             const smaSignal = latestSignals.SMA;
             
-            const smaConfig = indicatorConfig['sma'];
+            const smaConfig = indicatorConfigure['sma'];
             
-            document.querySelector('.indicator-description').textContent = smaConfig.description;
-            
-            document.querySelector('.indicator-value').textContent = lastSMA.toFixed(1);
-            
+            document.getElementById('indicator-description-sma').textContent = smaConfig.description;
+                        
             let smaExplanation = "";
             for (let rule of smaConfig.signalRules) {
                 if (rule.condition.length === 1 && typeof rule.condition(smaSignal) === 'boolean') {
@@ -319,21 +303,21 @@ document.addEventListener("DOMContentLoaded", () => {
             
             document.getElementById("sma-summary").textContent = smaExplanation;
 
-            const smaSignalBadge = document.querySelector('.indicator-signal .signal-badge');
+            const smaBadge = document.getElementById('sma-badge');
             if (smaSignal === "Buy") {
-                smaSignalBadge.textContent = "Buy";
-                smaSignalBadge.className = "signal-badge signal-buy";
-            } else if (lastRSI === "Sell") {
-                smaSignalBadge.textContent = "Sell";
-                smaSignalBadge.className = "signal-badge signal-sell";
+                smaBadge.textContent = "Buy";
+                smaBadge.className = "signal-badge signal-buy";
+            } else if (smaSignal === "Sell") {
+                smaBadge.textContent = "Sell";
+                smaBadge.className = "signal-badge signal-sell";
             } else {
-                smaSignalBadge.textContent = "Hold";
-                smaSignalBadge.className = "signal-badge signal-hold";
+                smaBadge.textContent = "Hold";
+                smaBadge.className = "signal-badge signal-hold";
             }
 
-            const smaLabels = stockData.map(data => data.date); // Dates
-            const priceValues = stockData.map(data => data.close); // Closing Prices
-            const smaValues = indicatorData.map(data => data.sma); // SMA Values
+            const smaLabels = stockData.map(data => data.date); 
+            const priceValues = stockData.map(data => data.close); 
+            const smaValues = indicatorData.map(data => data.sma); 
 
             const smaCtx = document.getElementById('smaChart').getContext('2d');
             const smaChart = new Chart(smaCtx, {
@@ -395,11 +379,21 @@ document.addEventListener("DOMContentLoaded", () => {
             const lastOBV = lastIndicator.obv;
             const obvSignal = latestSignals.SMA;
             
-            const obvConfig = indicatorConfig['sma'];
+            const obvConfig = indicatorConfigure['obv'];
             
-            document.querySelector('.indicator-description').textContent = obvConfig.description;
+            document.getElementById('indicator-description-obv').textContent = obvConfig.description;
+
+            let value;
+            if (obvSignal === 'Buy') {
+                value = "Rising"
+            } else if (obvSignal === 'Sell') {
+                value = "Falling"
+            } else {
+                value = "Neutral"
+            }
+            document.getElementById('indicator-value-obv').textContent = value;
             
-            document.querySelector('.indicator-value').textContent = lastOBV.toFixed(1);
+            // document.querySelector('.indicator-value').textContent = lastOBV.toFixed(1);
             
             let obvExplanation = "";
             for (let rule of obvConfig.signalRules) {
@@ -416,16 +410,16 @@ document.addEventListener("DOMContentLoaded", () => {
             
             document.getElementById("obv-summary").textContent = obvExplanation;
 
-            const obvSignalBadge = document.querySelector('.indicator-signal .signal-badge');
+            const obvBadge = document.getElementById('obv-badge');
             if (obvSignal === "Buy") {
-                obvSignalBadge.textContent = "Buy";
-                obvSignalBadge.className = "signal-badge signal-buy";
-            } else if (lastRSI === "Sell") {
-                obvSignalBadge.textContent = "Sell";
-                obvSignalBadge.className = "signal-badge signal-sell";
+                obvBadge.textContent = "Buy";
+                obvBadge.className = "signal-badge signal-buy";
+            } else if (obvSignal === "Sell") {
+                obvBadge.textContent = "Sell";
+                obvBadge.className = "signal-badge signal-sell";
             } else {
-                obvSignalBadge.textContent = "Hold";
-                obvSignalBadge.className = "signal-badge signal-hold";
+                obvBadge.textContent = "Hold";
+                obvBadge.className = "signal-badge signal-hold";
             }
 
             const obvLabels = stockData.map(data => data.date);
@@ -504,11 +498,11 @@ document.addEventListener("DOMContentLoaded", () => {
             const lastADX = lastIndicator.adx;
             const adxSignal = latestSignals.ADX;
             
-            const adxConfig = indicatorConfig['adx'];
+            const adxConfig = indicatorConfigure['adx'];
             
-            document.querySelector('.indicator-description').textContent = adxConfig.description;
+            document.getElementById('indicator-description-adx').textContent = adxConfig.description;
             
-            document.querySelector('.indicator-value').textContent = lastADX.toFixed(1);
+            document.getElementById('indicator-value-adx').textContent = lastADX.toFixed(1);
             
             let adxExplanation = "";
             for (let rule of adxConfig.signalRules) {
@@ -525,20 +519,20 @@ document.addEventListener("DOMContentLoaded", () => {
             
             document.getElementById("adx-summary").textContent = adxExplanation;
 
-            const adxSignalBadge = document.querySelector('.indicator-signal .signal-badge');
-            if (adxSignal === "Buy") {
-                adxSignalBadge.textContent = "Buy";
-                adxSignalBadge.className = "signal-badge signal-buy";
-            } else if (lastRSI === "Sell") {
-                adxSignalBadge.textContent = "Sell";
-                adxSignalBadge.className = "signal-badge signal-sell";
+            const adxBadge = document.getElementById('adx-badge');
+            if (adxSignal === "Strong Trend") {
+                adxBadge.textContent = "Strong Trend";
+                adxBadge.className = "signal-badge signal-buy";
+            } else if (adxSignal === "Weak Trend") {
+                adxBadge.textContent = "Weak Trend";
+                adxBadge.className = "signal-badge signal-sell";
             } else {
-                adxSignalBadge.textContent = "Hold";
-                adxSignalBadge.className = "signal-badge signal-hold";
+                adxBadge.textContent = "Hold";
+                adxBadge.className = "signal-badge signal-hold";
             }
 
-            const adxLabels = stockData.map(data => data.date);  // X-axis: Dates
-            const adxValues = indicatorData.map(data => data.adx);  // Y-axis: ADX values
+            const adxLabels = stockData.map(data => data.date);  
+            const adxValues = indicatorData.map(data => data.adx); 
 
             const adxCtx = document.getElementById('adxChart').getContext('2d');
             const adxChart = new Chart(adxCtx, {
@@ -600,11 +594,11 @@ document.addEventListener("DOMContentLoaded", () => {
             const lastMomentum = lastIndicator.momentum;
             const momentumSignal = latestSignals.Momentum;
             
-            const momentumConfig = indicatorConfig['momentum'];
+            const momentumConfig = indicatorConfigure['momentum'];
             
-            document.querySelector('.indicator-description').textContent = momentumConfig.description;
+            document.getElementById('indicator-description-momentum').textContent = momentumConfig.description;
             
-            document.querySelector('.indicator-value').textContent = lastMomentum.toFixed(1);
+            document.getElementById('indicator-value-momentum').textContent = lastMomentum.toFixed(1);
             
             let momentumExplanation = "";
             for (let rule of momentumConfig.signalRules) {
@@ -621,16 +615,16 @@ document.addEventListener("DOMContentLoaded", () => {
             
             document.getElementById("momentum-summary").textContent = momentumExplanation;
 
-            const momentumSignalBadge = document.querySelector('.indicator-signal .signal-badge');
+            const momentumBadge = document.getElementById('momentum-badge');
             if (momentumSignal === "Buy") {
-                momentumSignalBadge.textContent = "Buy";
-                momentumSignalBadge.className = "signal-badge signal-buy";
-            } else if (lastRSI === "Sell") {
-                momentumSignalBadge.textContent = "Sell";
-                momentumSignalBadge.className = "signal-badge signal-sell";
+                momentumBadge.textContent = "Buy";
+                momentumBadge.className = "signal-badge signal-buy";
+            } else if (momentumSignal === "Sell") {
+                momentumBadge.textContent = "Sell";
+                momentumBadge.className = "signal-badge signal-sell";
             } else {
-                momentumSignalBadge.textContent = "Hold";
-                momentumSignalBadge.className = "signal-badge signal-hold";
+                momentumBadge.textContent = "Hold";
+                momentumBadge.className = "signal-badge signal-hold";
             }
 
             const momentumLabels = stockData.map(data => data.date); 
@@ -694,50 +688,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
 
-            const indicators = ["rsi", "sma", "obv", "adx", "momentum"];
-            indicators.forEach(indicator => {
-                const values = indicatorData.map(d => d[indicator]);
-                const canvasId = `${indicator}Chart`;
-                const label = indicator.toUpperCase();
-
-                new Chart(document.getElementById(canvasId), {
-                    type: 'line',
-                    data: {
-                        labels,
-                        datasets: [{
-                            label,
-                            data: values,
-                            borderColor: '#10b981',
-                            tension: 0.2,
-                            fill: false
-                        }]
-                    },
-                    options: {
-                        responsive: true,
-                        scales: {
-                            x: { display: true },
-                            y: { display: true }
-                        }
-                    }
-                });
-
-                // Update value display
-                const latestValue = values.at(-1);
-                document.querySelector(`.indicator-section:has(#${canvasId}) .indicator-value`).textContent =
-                    typeof latestValue === 'number' ? latestValue.toFixed(2) : latestValue;
-
-                // Update signal badge
-                const signal = indicator_data.at(-1).signals[label];
-                const signalElem = document.querySelector(`.indicator-section:has(#${canvasId}) .indicator-signal .signal-badge`);
-                signalElem.textContent = signal;
-
-                signalElem.className = "signal-badge"; // reset classes
-                if (signal === "Buy") signalElem.classList.add("signal-buy");
-                else if (signal === "Sell") signalElem.classList.add("signal-sell");
-                else if (signal === "Hold") signalElem.classList.add("signal-hold");
-                else if (signal === "Strong Trend") signalElem.classList.add("signal-buy");
-                else if (signal === "Weak Trend") signalElem.classList.add("signal-weak-trend");
-            });
+            
         })
         .catch(error => console.error("Failed to load company data:", error));
 });

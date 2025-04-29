@@ -11,7 +11,6 @@ def web_scrape():
         print("Successfully fetched the webpage!")
         soup = BeautifulSoup(response.content, 'html.parser')
 
-        # Scrape the date
         date_element = soup.find('span', {'id': 'ctl00_ContentPlaceHolder1_date'})
         if date_element:
             date_str = date_element.get_text(strip=True).replace("As of ", "").split()[0]  
@@ -41,7 +40,6 @@ def web_scrape():
             columns = row.find_all('td')
             column_data = [col.get_text(strip=True) if col.get_text(strip=True) else "N/A" for col in columns]
 
-            # Ensure correct number of columns (ignoring last 2)
             if len(column_data) < 8: 
                 print(f"Skipping row due to missing data: {column_data}")
                 continue
@@ -71,13 +69,11 @@ def scrape_and_store():
 
     for data in scraped_data:
         try:
-            # Extract the date from the scraped data
             date = data.get("date")
             if not date:
                 print("Skipping row as the date is missing.")
                 continue
 
-            # Convert values to the correct type
             symbol = data["symbol"]
             open_price = float(data["open"]) if data["open"] != "N/A" else None
             high = float(data["high"]) if data["high"] != "N/A" else None
@@ -85,18 +81,15 @@ def scrape_and_store():
             close_price = float(data["ltp"]) if data["ltp"] != "N/A" else None
             volume = int(data["volume"]) if data["volume"] != "N/A" else None
 
-            # Ensure required fields are not missing
             if not (symbol and open_price and high and low and close_price and volume):
                 print(f"Skipping {symbol} due to missing required data.")
                 continue
 
-            # Find stock by symbol (not by ID anymore)
             stock = Stock.query.filter_by(symbol=symbol).first()
             if not stock:
                 print(f"Stock {symbol} not found in the database. Skipping...")
                 continue
 
-            # Check if the data for the same date already exists
             existing_record = StockPrice.query.filter_by(stock_symbol=symbol, date=date).first()
             if existing_record:
                 print(f"Data for {symbol} on {date} already exists. Skipping...")

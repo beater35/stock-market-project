@@ -1,4 +1,4 @@
-const indicatorConfig = {
+const indicatorConfigure = {
 'rsi': {
     description: 'RSI measures the speed and change of price movements. Values below 30 indicate oversold conditions (buy signal), while values above 70 indicate overbought conditions (sell signal).',
     chartColor: '#4285F4',
@@ -17,7 +17,7 @@ const indicatorConfig = {
             explanation: value => `The RSI is trending downward and currently at ${value.toFixed(2)}, suggesting the asset may be oversold.`
         },
         {
-            condition: value => true, // default case
+            condition: value => true, 
             signal: 'Hold',
             borderColor: '#FFEB3B',
             explanation: value => `The RSI is at ${value.toFixed(2)}, within the neutral range.`
@@ -25,7 +25,7 @@ const indicatorConfig = {
     ]
 },
 'obv': {
-    description: 'OBV measures buying and selling pressure. Increasing OBV indicates positive volume pressure, which can lead to higher prices.',
+    description: 'OBV (On-Balance Volume) compares volume flow with price movement. A "Buy" signal occurs when both OBV and price rise, indicating strong upward pressure. A "Sell" occurs when both decline, signaling downward momentum. Otherwise, the trend is unclear.',
     chartColor: '#4285F4',
     chartBgColor: 'rgba(66, 133, 244, 0.1)',
     signalRules: [
@@ -33,24 +33,24 @@ const indicatorConfig = {
             condition: (signalValue) => signalValue === 'Buy',
             signal: 'Buy',
             borderColor: '#81C784',
-            explanation: value => `The current OBV value is ${value.toFixed(2)}, suggesting an uptrend and potential buy signal.`
+            explanation: value => `OBV and price are both rising. OBV value: ${value.toFixed(2)}. Indicates buying pressure and potential uptrend.`
         },
         {
             condition: (signalValue) => signalValue === 'Sell',
             signal: 'Sell',
             borderColor: '#EF5350',
-            explanation: value => `The current OBV value is ${value.toFixed(2)}, suggesting a downtrend and potential sell signal.`
+            explanation: value => `OBV and price are both falling. OBV value: ${value.toFixed(2)}. Suggests selling pressure and potential downtrend.`
         },
         {
-            condition: () => true, // default case
+            condition: () => true, 
             signal: 'Neutral',
             borderColor: '#FFEB3B',
-            explanation: () => 'The OBV is stable, indicating no clear trend.'
+            explanation: () => 'OBV and price are diverging. Trend direction is unclear — signal is Hold.'
         }
     ]
 },
 'sma': {
-    description: 'SMA (Simple Moving Average) smooths out price data by creating a constantly updated average price. It is used to identify the direction of the trend.',
+    description: 'The 20-day SMA acts as a trend-following indicator. When the current price is above the SMA, it may indicate upward momentum; when below, it may signal downward movement.',
     chartColor: '#FF5733',
     chartBgColor: 'rgba(255, 87, 51, 0.1)',
     signalRules: [
@@ -58,24 +58,24 @@ const indicatorConfig = {
             condition: (signalValue) => signalValue === 'Buy',
             signal: 'Buy',
             borderColor: '#81C784',
-            explanation: value => `The current SMA value is ${value.toFixed(2)}, suggesting an uptrend and potential buy signal.`
+            explanation: value => `The price is currently above the 20-day SMA of ${value.toFixed(2)}, indicating upward momentum and a potential buy signal.`
         },
         {
             condition: (signalValue) => signalValue === 'Sell',
             signal: 'Sell',
             borderColor: '#EF5350',
-            explanation: value => `The current SMA value is ${value.toFixed(2)}, suggesting a downtrend and potential sell signal.`
+            explanation: value => `The price is currently below the 20-day SMA of ${value.toFixed(2)}, suggesting downward pressure and a possible sell signal.`
         },
         {
-            condition: () => true, // default case
+            condition: () => true, 
             signal: 'Neutral',
             borderColor: '#FFEB3B',
-            explanation: () => 'The SMA is stable, indicating no clear trend.'
+            explanation: () => 'The price and SMA are closely aligned, indicating no clear trend.'
         }
     ]
 },
 'adx': {
-    description: 'ADX (Average Directional Index) measures trend strength. Values above 25 indicate a strong trend, while values below 20 indicate a weak trend.',
+    description: 'ADX (Average Directional Index) measures the strength of a trend, regardless of direction. Values above 25 suggest a strong trend, while lower values suggest a weak or sideways market.',
     chartColor: '#FFC300',
     chartBgColor: 'rgba(255, 195, 0, 0.1)',
     signalRules: [
@@ -83,13 +83,13 @@ const indicatorConfig = {
             signal: 'Strong Trend',
             borderColor: '#81C784',
             condition: (signalValue) => signalValue === 'Strong Trend',  
-            explanation: value => `The ADX value is ${value.toFixed(2)}, indicating a strong trend in the market. This is a good opportunity to buy.`
+            explanation: value => `The ADX value is ${value.toFixed(2)}, indicating a strong trend. This may support continuing with the current position.`
         },
         {
             signal: 'Weak Trend',
             borderColor: '#EF5350',
             condition: (signalValue) => signalValue === 'Weak Trend', 
-            explanation: value => `The ADX value is ${value.toFixed(2)}, indicating a weak or no trend in the market. This is a good opportunity to sell.`
+            explanation: value => `The ADX value is ${value.toFixed(2)}, indicating a weak or range-bound market. Caution is advised before entering a trade.`
         },
         {
             signal: 'Neutral',
@@ -100,7 +100,7 @@ const indicatorConfig = {
     ]
 },
 'momentum': {
-    description: 'Momentum measures the rate of price change. A rising momentum suggests a strengthening trend, while falling momentum suggests a weakening trend.',
+    description: 'Momentum compares current price to a previous price to gauge the speed and strength of movement. Positive values suggest upward pressure; negative values suggest downward pressure.',
     chartColor: '#8E44AD',
     chartBgColor: 'rgba(142, 68, 173, 0.1)',
     signalRules: [
@@ -108,13 +108,13 @@ const indicatorConfig = {
             condition: (signalValue) => signalValue === 'Buy',
             signal: 'Buy',
             borderColor: '#81C784',
-            explanation: value => `The momentum value is ${value.toFixed(2)}, suggesting positive price movement and potential buy signal.`
+            explanation: value => `The momentum value is ${value.toFixed(2)}, indicating upward price momentum and a potential buy signal.`
         },
         {
             condition: (signalValue) => signalValue === 'Sell',
             signal: 'Sell',
             borderColor: '#EF5350',
-            explanation: value => `The momentum value is ${value.toFixed(2)}, suggesting negative price movement and potential sell signal.`
+            explanation: value => `The momentum value is ${value.toFixed(2)}, suggesting negative price movement and a potential sell signal.`
         },
         {
             condition: () => true, 
@@ -131,7 +131,6 @@ chartBgColor: 'rgba(66, 133, 244, 0.1)',
 signalRules: [
     {
     condition: (latest, values) => {
-        // Simple check if trending up
         const recentValues = values.slice(-5);
         return recentValues[recentValues.length - 1] > recentValues[0];
     },
@@ -139,7 +138,7 @@ signalRules: [
     explanation: () => 'The MACD is trending upward, potentially indicating bullish momentum.'
     },
     {
-    condition: () => true, // default case
+    condition: () => true, 
     signal: 'Sell',
     explanation: () => 'The MACD is trending downward, potentially indicating bearish momentum.'
     }
@@ -147,7 +146,6 @@ signalRules: [
 }
 };
 
-// Default config for any indicator not specifically defined
 const defaultIndicatorConfig = {
 description: 'This is a technical indicator used to analyze market trends.',
 chartColor: '#4285F4',

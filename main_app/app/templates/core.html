@@ -9,11 +9,20 @@
 </head>
 <body>
     <h1>Stock Analysis Dashboard</h1>
-
-    <div class="last-updated" style="font-size: 16px; color: #888; font-style: italic; margin-bottom: -12px; margin-top: -9px;">
-        Last updated on: <span id="lastUpdated">Loading...</span>
+    <div class="header-container">
+        <div class="last-updated" style="font-size: 16px; color: #888; font-style: italic; margin-bottom: -12px; margin-top: -9px;">
+            Last updated on: <span id="lastUpdated">Loading...</span>
+        </div>
+        <button onclick="downloadTableAsCSV()" disabled id="downloadCSV" class="export-btn" style="background-color: #f8f9fa; color: #212529; border: 1px solid #dee2e6; padding: 6px 12px; border-radius: 4px; cursor: pointer; display: flex; align-items: center; font-weight: 400; font-size: 14px; margin-left: 10px;">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 6px;">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                <polyline points="7 10 12 15 17 10"></polyline>
+                <line x1="12" y1="15" x2="12" y2="3"></line>
+            </svg>
+            Export CSV
+        </button>
+        <br>
     </div>
-    <br>
 
     <!-- <a href="/live-market" target="_blank" class="live-data-btn">
         <span class="pulse-dot"></span>
@@ -56,7 +65,6 @@
             </div>
         </div>
         <div class="active-filters" id="activeFilters">
-            <!-- Active filters will appear here -->
         </div>
         </div>
         <div class="stocks-count">Showing <span id="stocksCount">0</span> stocks</div>
@@ -78,7 +86,6 @@
             </tr>
         </thead>
         <tbody>
-            <!-- Rows will be populated by JavaScript -->
         </tbody>
     </table>
 

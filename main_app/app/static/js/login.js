@@ -21,10 +21,8 @@ document.addEventListener("DOMContentLoaded", function () {
       underline.style.transform = "translateX(100%)";
   }
 
-  // Ensure correct tab is shown on page load
   showLogin();
 
-  // Attach event listeners
   loginTab.addEventListener("click", showLogin);
   signupTab.addEventListener("click", showSignup);
 });

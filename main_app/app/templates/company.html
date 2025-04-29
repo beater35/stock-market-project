@@ -15,7 +15,7 @@
 </head>
 <body>
     <div class="container">
-        <a href="{{ url_for('static', filename='core.html') }}" class="back-button">← Back to Stock List</a>
+        <a href="{{ url_for('core') }}" class="back-button">← Back to Stock List</a>
         
         <header>
             <div class="header-content">
@@ -28,7 +28,6 @@
             </div>
         </header>
         
-        <!-- Stock Price Overview -->
         <div class="card">
             <h2 class="card-title">Stock Price Overview</h2>
             <div class="price-overview">
@@ -60,7 +59,6 @@
         </div>
 
         
-        <!-- Price Chart -->
         <div class="card">
             <h2 class="card-title">Price Chart</h2>
             <div class="tabs">
@@ -72,7 +70,6 @@
                 <canvas id="priceChart" style="height: 80%; width: 100%;"></canvas>
                 <canvas id="volumeChart" style="height: 20%; width: 100%; margin-top: -40px;"></canvas>
             </div>
-                        
         </div>
         
         <!-- Technical Indicators -->
@@ -83,20 +80,20 @@
             <div class="indicator-section">
                 <div class="indicator-header">
                     <div class="indicator-name" id="">RSI (Relative Strength Index)</div>
-                    <div class="indicator-value">63.8</div>
+                    <div class="indicator-value" id="indicator-value-rsi">63.8</div>
                 </div>
                 <div class="chart-container indicator-chart">
                     <canvas id="rsiChart" width="1100" height="600"></canvas>
                 </div>                
                 <div class="indicator-summary" id="rsi-summary">
                 </div>
-                <div class="indicator-description">
-                    RSI measures the speed and change of price movements. Values below 30 indicate oversold conditions (buy signal), while values above 70 indicate overbought conditions (sell signal).
-                    The RSI is trending upward and currently at 63.8, suggesting the asset is approaching overbought territory but remains in neutral range.
+                <div class="indicator-description" id="indicator-description-rsi">
+                    <!-- RSI measures the speed and change of price movements. Values below 30 indicate oversold conditions (buy signal), while values above 70 indicate overbought conditions (sell signal).
+                    The RSI is trending upward and currently at 63.8, suggesting the asset is approaching overbought territory but remains in neutral range. -->
                 </div>
                 <div class="indicator-signal">
                     <span>Signal:</span>
-                    <span class="signal-badge signal-hold">Hold</span>
+                    <span class="signal-badge" id="rsi-badge"></span>
                 </div>
             </div>
             
@@ -105,20 +102,20 @@
             <div class="indicator-section">
                 <div class="indicator-header">
                     <div class="indicator-name">SMA (Simple Moving Average)</div>
-                    <div class="indicator-value">Price/SMA20 Cross</div>
+                    <div class="indicator-value" id="indicator-value-sma">Price/SMA20 Cross</div>
                 </div>
                 <div class="chart-container indicator-chart">
                     <canvas id="smaChart" width="1100" height="250"></canvas>
                 </div>                
                 <div class="indicator-summary" id="sma-summary">
                 </div>
-                <div class="indicator-description">
-                    The Simple Moving Average (SMA) is used to identify trend direction. When the shorter-term SMA (50-day) crosses above the longer-term SMA (200-day), it generates a "golden cross" buy signal. When it crosses below, it creates a "death cross" sell signal.
-                    Currently, the 50-day SMA is above the 200-day SMA, indicating a bullish trend in place.
+                <div class="indicator-description" id="indicator-description-sma">
+                    <!-- The Simple Moving Average (SMA) is used to identify trend direction. When the shorter-term SMA (50-day) crosses above the longer-term SMA (200-day), it generates a "golden cross" buy signal. When it crosses below, it creates a "death cross" sell signal.
+                    Currently, the 50-day SMA is above the 200-day SMA, indicating a bullish trend in place. -->
                 </div>
-                <div class="indicator-signal">
+                <div class="indicator-signal-">
                     <span>Signal:</span>
-                    <span class="signal-badge signal-sell">Sell</span>
+                    <span class="signal-badge" id="sma-badge"></span>
                 </div>
             </div>
             
@@ -126,20 +123,20 @@
             <div class="indicator-section">
                 <div class="indicator-header">
                     <div class="indicator-name">OBV (On-Balance Volume)</div>
-                    <div class="indicator-value">Rising</div>
+                    <div class="indicator-value" id="indicator-value-obv">Rising</div>
                 </div>
                 <div class="chart-container indicator-chart">
                     <canvas id="obvChart" width="1100" height="250"></canvas>
                 </div>                
                 <div class="indicator-summary" id="obv-summary">
                 </div>
-                <div class="indicator-description">
-                    On-Balance Volume (OBV) measures buying and selling pressure by adding volume on up days and subtracting it on down days. When OBV is rising while prices are also rising, it confirms the uptrend. A divergence between OBV and price can signal a potential reversal.
-                    Currently, OBV is showing strong buying pressure with a steady upward trend, confirming the price movement.
+                <div class="indicator-description" id="indicator-description-obv">
+                    <!-- On-Balance Volume (OBV) measures buying and selling pressure by adding volume on up days and subtracting it on down days. When OBV is rising while prices are also rising, it confirms the uptrend. A divergence between OBV and price can signal a potential reversal.
+                    Currently, OBV is showing strong buying pressure with a steady upward trend, confirming the price movement. -->
                 </div>
                 <div class="indicator-signal">
                     <span>Signal:</span>
-                    <span class="signal-badge signal-buy">Buy</span>
+                    <span class="signal-badge" id="obv-badge"></span>
                 </div>
             </div>
             
@@ -147,20 +144,20 @@
             <div class="indicator-section">
                 <div class="indicator-header">
                     <div class="indicator-name">ADX (Average Directional Index)</div>
-                    <div class="indicator-value">28.5</div>
+                    <div class="indicator-value" id="indicator-value-adx">28.5</div>
                 </div>
                 <div class="chart-container indicator-chart">
                     <canvas id="adxChart" width="1100" height="250"></canvas>
                 </div>                
                 <div class="indicator-summary" id="adx-summary">
                 </div>
-                <div class="indicator-description">
-                    ADX measures the strength of a trend, regardless of its direction. Values below 20 indicate a weak trend or ranging market, while values above 25 indicate a strong trend. It does not indicate trend direction, only strength.
-                    The current ADX reading of 28.5 suggests a strong trend is in place, which makes trend-following strategies more reliable.
+                <div class="indicator-description" id="indicator-description-adx">
+                    <!-- ADX measures the strength of a trend, regardless of its direction. Values below 20 indicate a weak trend or ranging market, while values above 25 indicate a strong trend. It does not indicate trend direction, only strength.
+                    The current ADX reading of 28.5 suggests a strong trend is in place, which makes trend-following strategies more reliable. -->
                 </div>
                 <div class="indicator-signal">
                     <span>Signal:</span>
-                    <span class="signal-badge signal-weak-trend">Weak Trend</span>
+                    <span class="signal-badge" id="adx-badge"></span>
                 </div>
             </div>
             
@@ -168,20 +165,20 @@
             <div class="indicator-section">
                 <div class="indicator-header">
                     <div class="indicator-name">Momentum</div>
-                    <div class="indicator-value">+4.2%</div>
+                    <div class="indicator-value" id="indicator-value-momentum">+4.2%</div>
                 </div>
                 <div class="chart-container indicator-chart">
                     <canvas id="momentumChart" width="1100" height="400"></canvas>
                 </div>                
                 <div class="indicator-summary" id="momentum-summary">
                 </div>
-                <div class="indicator-description">
-                    Momentum measures the rate of change in price over a specified period. Positive values indicate upward momentum, while negative values indicate downward momentum. Changes in momentum can signal potential trend reversals.
-                    The momentum indicator shows +4.2%, indicating positive price acceleration and continued bullish sentiment.
+                <div class="indicator-description" id="indicator-description-momentum">
+                    <!-- Momentum measures the rate of change in price over a specified period. Positive values indicate upward momentum, while negative values indicate downward momentum. Changes in momentum can signal potential trend reversals.
+                    The momentum indicator shows +4.2%, indicating positive price acceleration and continued bullish sentiment. -->
                 </div>
                 <div class="indicator-signal">
                     <span>Signal:</span>
-                    <span class="signal-badge signal-buy">Buy</span>
+                    <span class="signal-badge" id="momentum-badge"></span>
                 </div>
             </div>
         </div>

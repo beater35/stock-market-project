@@ -5,7 +5,6 @@ from sqlalchemy import func
 from app import db
 from app.models import StockPrice, LiveStockPrice, LiveIndicatorValue
 
-# Number of historical days to fetch (14 for RSI, 30 for SMA)
 HISTORICAL_DAYS = 40  
 
 def fetch_historical_data(stock_symbol):
@@ -49,7 +48,6 @@ def store_live_indicator(stock_symbol, indicator_name, value):
         print(f"No live data found for {stock_symbol}, skipping...")
         return
 
-    # Check if an entry already exists for this stock, date, time, and indicator
     existing_entry = LiveIndicatorValue.query.filter_by(
         stock_symbol=stock_symbol,
         date=live_data.date,
@@ -58,11 +56,9 @@ def store_live_indicator(stock_symbol, indicator_name, value):
     ).first()
 
     if existing_entry:
-        # Update the existing value instead of creating a new one
         existing_entry.value = value
         print(f"Updated {indicator_name} for {stock_symbol} at {live_data.date} {live_data.time}")
     else:
-        # Create a new entry if one doesn't exist
         new_entry = LiveIndicatorValue(
             stock_symbol=stock_symbol,
             date=live_data.date,
@@ -82,7 +78,6 @@ def process_stock(stock_symbol):
         print(f"No historical data found for {stock_symbol}, skipping...")
         return
 
-    # Convert historical data to Pandas DataFrame
     df = pd.DataFrame({
         'date': [d.date for d in historical_data],
         'close': [d.close_price for d in historical_data],
@@ -91,14 +86,12 @@ def process_stock(stock_symbol):
         'volume': [d.volume for d in historical_data]
     }).set_index('date')
 
-    # Compute indicators using TA-Lib
     rsi = calculate_rsi(df['close'])
     sma = calculate_sma(df['close'])
     obv = calculate_obv(df['close'], df['volume'])
     adx = calculate_adx(df['high'], df['low'], df['close'])
     momentum = calculate_momentum(df['close'])
 
-    # Store calculated indicators
     store_live_indicator(stock_symbol, 'RSI', rsi)
     store_live_indicator(stock_symbol, 'SMA', sma)
     store_live_indicator(stock_symbol, 'OBV', obv)
@@ -108,7 +101,7 @@ def process_stock(stock_symbol):
 def update_live_indicators():
     """Main function to update live indicator values for all stocks."""
     stock_symbols = db.session.query(StockPrice.stock_symbol).distinct().all()
-    stock_symbols = [s[0] for s in stock_symbols]  # Extract symbols from query result
+    stock_symbols = [s[0] for s in stock_symbols] 
 
     for symbol in stock_symbols:
         process_stock(symbol)

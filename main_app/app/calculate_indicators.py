@@ -48,22 +48,17 @@ def calculate_indicators(df):
 def insert_or_update_indicator_values(df):
     """Insert new indicator values or update existing ones using PostgreSQL ON CONFLICT."""
     try:
-        # Check if DataFrame is empty
         if df.empty:
             current_app.logger.warning("DataFrame is empty, nothing to insert")
             return
             
-        # Print some diagnostic information
         current_app.logger.info(f"Preparing to upsert {len(df)} records")
         current_app.logger.info(f"Sample data: {df.head(2).to_dict('records')}")
         
-        # Convert DataFrame to a list of dictionaries
         values_list = df[['stock_symbol', 'date', 'rsi', 'sma', 'obv', 'adx', 'momentum']].to_dict('records')
         
-        # Create the upsert statement
         stmt = insert(IndicatorValues).values(values_list)
         
-        # Define what to do on conflict - update all indicator values
         update_dict = {
             'rsi': stmt.excluded.rsi,
             'sma': stmt.excluded.sma,
@@ -72,23 +67,19 @@ def insert_or_update_indicator_values(df):
             'momentum': stmt.excluded.momentum
         }
         
-        # Create the complete upsert statement with ON CONFLICT behavior
         upsert_stmt = stmt.on_conflict_do_update(
             index_elements=['stock_symbol', 'date'],
             set_=update_dict
         )
         
-        # Execute the statement
         result = db.session.execute(upsert_stmt)
         db.session.commit()
         
-        # Log the operation results
         current_app.logger.info(f"Inserted {len(values_list)} indicator records successfully.")
     
     except Exception as e:
         db.session.rollback()
         current_app.logger.error(f"Error updating indicator values: {str(e)}")
-        # Print full exception details for debugging
         import traceback
         current_app.logger.error(traceback.format_exc())
         

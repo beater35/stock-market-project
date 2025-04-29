@@ -6,7 +6,6 @@
     --card-bg: #ffffff;
     --border-color: #e0e0e0;
     
-    /* Signal colors from your image */
     --buy-color: #5ed168;
     --sell-color: #f76b60;
     --hold-color: #f7c960;
@@ -218,12 +217,12 @@ header {
     margin-top: 10px;
     margin-bottom: 10px;
     font-weight: 500;
-    color: #374151; /* Slate gray */
+    color: #374151; 
     font-size: 15px;
     line-height: 1.5;
     padding: 8px 12px;
-    background-color: #f3f4f6; /* Light gray background */
-    border-left: 4px solid #3b82f6; /* Blue accent */
+    background-color: #f3f4f6;
+    border-left: 4px solid #3b82f6; 
     border-radius: 4px;
 }
 

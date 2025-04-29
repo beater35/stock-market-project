@@ -4,36 +4,76 @@ document.addEventListener("DOMContentLoaded", function () {
     const urlParams = new URLSearchParams(window.location.search);
     const debugMode = urlParams.has('debug');
     const apiEndpoint = debugMode ? '/api/indicators' : '/api/signals';
-    let allCompanies = []; // Store all companies data for filtering
+    let allCompanies = []; 
+
+    function downloadTableAsCSV() {
+        const button = document.getElementById("downloadCSV");
+        if (!button) return;
+
+        button.disabled = false;
+        button.addEventListener("click", function () {
+            const table = document.querySelector("#indicatorsTable");
+            if (!table) {
+                alert("Table not found.");
+                return;
+            }
+
+            let csv = [];
+            for (let row of table.rows) {
+                let rowData = [];
+                for (let cell of row.cells) {
+                    rowData.push('"' + cell.innerText.replace(/"/g, '""') + '"');
+                }
+                csv.push(rowData.join(","));
+            }
+
+            const csvContent = csv.join("\n");
+            const blob = new Blob([csvContent], { type: "text/csv" });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement("a");
+            a.href = url;
+            a.download = `signals_${new Date().toISOString().split('T')[0]}.csv`;
+            a.click();
+            URL.revokeObjectURL(url);
+        });
+    }
     
-    // Load data and initialize
-    fetch(apiEndpoint)
-        .then(response => response.json())
-        .then(companies => {
-            allCompanies = companies;
-            // Sort companies alphabetically by symbol
-            allCompanies.sort((a, b) => a.symbol.localeCompare(b.symbol));
-            renderTable(allCompanies);
-            setupFilters();
-            updateStocksCount(allCompanies.length);
-            updateLastUpdatedDate(allCompanies);
-        })
-        .catch(error => console.error("Error loading data:", error));
+    const cachedData = sessionStorage.getItem(apiEndpoint);
+
+    if (cachedData) {
+        const companies = JSON.parse(cachedData);
+        allCompanies = companies;
+        allCompanies.sort((a, b) => a.symbol.localeCompare(b.symbol));
+        renderTable(allCompanies);
+        setupFilters();
+        updateStocksCount(allCompanies.length);
+        updateLastUpdatedDate(allCompanies);
+    } else {
+        fetch(apiEndpoint)
+            .then(response => response.json())
+            .then(companies => {
+                sessionStorage.setItem(apiEndpoint, JSON.stringify(companies)); // cache the data
+                allCompanies = companies;
+                allCompanies.sort((a, b) => a.symbol.localeCompare(b.symbol));
+                renderTable(allCompanies);
+                setupFilters();
+                updateStocksCount(allCompanies.length);
+                updateLastUpdatedDate(allCompanies);
+            })
+            .catch(error => console.error("Error loading data:", error));
+    }
     
-    // Render table with given companies data
     function renderTable(companies) {
         const tableBody = document.querySelector("#indicatorsTable tbody");
-        tableBody.innerHTML = ''; // Clear existing rows
+        tableBody.innerHTML = ''; 
         
         companies.forEach((company, index) => {
             const row = document.createElement("tr");
             
-            // Serial Number
             const serialCell = document.createElement("td");
             serialCell.textContent = index + 1;
             row.appendChild(serialCell);
             
-            // Company Symbol (Clickable)
             const symbolCell = document.createElement("td");
             const link = document.createElement("a");
             link.href = `/company/${company.symbol}`;
@@ -41,12 +81,10 @@ document.addEventListener("DOMContentLoaded", function () {
             symbolCell.appendChild(link);
             row.appendChild(symbolCell);
 
-            // Closing Price Column
             const closePriceCell = document.createElement("td");
             closePriceCell.textContent = company.close_price || "N/A";  
             row.appendChild(closePriceCell);
             
-            // Technical Indicator Signals
             const indicatorsList = ["RSI", "SMA", "OBV", "ADX", "Momentum"];
             indicatorsList.forEach(indicator => {
                 const cell = document.createElement("td");
@@ -54,7 +92,6 @@ document.addEventListener("DOMContentLoaded", function () {
 
                 const signalSpan = document.createElement("span");
 
-                // Assign class based on signal type
                 if (indicator === "ADX") {
                     if (signal === "Strong Trend") {
                         signalSpan.classList.add("strong-trend");
@@ -80,18 +117,15 @@ document.addEventListener("DOMContentLoaded", function () {
                     }
                 }
 
-                // ✅ Add click listener if it's a real signal
                 const validSignals = ["Buy", "Sell", "Hold", "Strong Trend", "Weak Trend"];
                 if (validSignals.includes(signal)) {
                     signalSpan.style.cursor = "pointer";
 
-                    // Bind signal and indicator value to the element
                     signalSpan.dataset.signalValue = signal;
                     signalSpan.addEventListener("click", () => {
                         showPopup(indicator.toLowerCase(), company.symbol, signalSpan.dataset.signalValue);
                     });
 
-                    // ➕ Add visual-only info icon
                     const infoIcon = document.createElement("span");
                     infoIcon.textContent = " ⓘ";
                     infoIcon.classList.add("info-icon");
@@ -105,25 +139,20 @@ document.addEventListener("DOMContentLoaded", function () {
             });
 
             
-            // Signals Count Column
             const signalsCountCell = document.createElement("td");
-            // Assuming `company.signals_count` is the array with [buy_count, sell_count, hold_count]
             const signalsCount = company.signals_count || [0, 0, 0]; 
             const buyCount = signalsCount[0];
             const sellCount = signalsCount[1];
             const holdCount = signalsCount[2];
 
-            // Create container for the pills
             const pillsContainer = document.createElement("div");
             pillsContainer.style.display = "flex";
             pillsContainer.style.gap = "4px";
 
-            // Create buy pill (green)
             const buyPill = document.createElement("span");
             buyPill.textContent = `${buyCount}`;
             buyPill.classList.add(buyCount > 0 ? "bullish" : "neutral");
 
-            // Create sell pill (red)
             const sellPill = document.createElement("span");
             sellPill.textContent = `${sellCount}`;
             sellPill.classList.add(sellCount > 0 ? "bearish" : "neutral");
@@ -146,7 +175,6 @@ document.addEventListener("DOMContentLoaded", function () {
             row.appendChild(signalsCountCell);
 
             
-            // Actions Column
             const actionsCell = document.createElement("td");
             const detailsLink = document.createElement("a");
             detailsLink.href = `/company/${company.symbol}`;
@@ -157,33 +185,28 @@ document.addEventListener("DOMContentLoaded", function () {
             
             tableBody.appendChild(row);
         });
+
+        downloadTableAsCSV();
     }
     
-    // Set up filter tab functionality
     function setupFilters() {
         const filterTabs = document.querySelectorAll('.filter-tab');
         const indicatorFilters = document.querySelectorAll('.filter-option');
         const allStocksBtn = document.querySelector('.filter-tab[data-filter="all"]');
         const activeFiltersContainer = document.getElementById('activeFilters');
         
-        // Object to store active filters by indicator group
         let activeFiltersByGroup = {};
         
-        // Basic tab filters
         filterTabs.forEach(tab => {
             tab.addEventListener('click', function() {
-                // Clear any active indicator filters
                 activeFiltersByGroup = {};
                 activeFiltersContainer.innerHTML = '';
                 
-                // Remove active class from all tabs
                 filterTabs.forEach(t => t.classList.remove('active'));
-                // Add active class to clicked tab
                 this.classList.add('active');
                 
                 const filter = this.dataset.filter;
                 
-                // Apply filter
                 let filteredCompanies;
                 if (filter === 'all') {
                     filteredCompanies = allCompanies;
@@ -200,26 +223,21 @@ document.addEventListener("DOMContentLoaded", function () {
             });
         });
         
-        // Indicator filters
         indicatorFilters.forEach(option => {
             option.addEventListener('click', function() {
                 const filter = this.dataset.filter;
                 const filterName = this.innerText;
                 const filterGroup = this.closest('.dropdown-section').querySelector('.dropdown-header').innerText;
                 
-                // Remove active class from all basic tabs
                 filterTabs.forEach(tab => tab.classList.remove('active'));
                 
-                // Check if this group already has an active filter
                 if (activeFiltersByGroup[filterGroup]) {
-                    // Remove the old filter tag
                     const oldFilterTag = document.querySelector(`.active-filter[data-group="${filterGroup}"]`);
                     if (oldFilterTag) {
                         oldFilterTag.remove();
                     }
                 }
                 
-                // Update the active filters object with the new selection
                 activeFiltersByGroup[filterGroup] = {
                     filter: filter,
                     name: filterName,
@@ -228,15 +246,12 @@ document.addEventListener("DOMContentLoaded", function () {
                     signal: filterName
                 };
                 
-                // Create active filter tag
                 createActiveFilterTag(filter, `${filterGroup}: ${filterName}`, filterGroup);
                 
-                // Apply filters
                 applyIndicatorFilters();
             });
         });
         
-        // Create active filter tag
         function createActiveFilterTag(filter, text, group) {
             const tag = document.createElement('div');
             tag.className = 'active-filter';
@@ -244,11 +259,9 @@ document.addEventListener("DOMContentLoaded", function () {
             tag.innerHTML = `${text} <span class="filter-remove" data-filter="${filter}" data-group="${group}">×</span>`;
             activeFiltersContainer.appendChild(tag);
             
-            // Add event listener to remove button
             tag.querySelector('.filter-remove').addEventListener('click', function() {
                 const groupToRemove = this.dataset.group;
                 
-                // Remove from active filters object
                 delete activeFiltersByGroup[groupToRemove];
                 tag.remove();
                 
@@ -262,7 +275,6 @@ document.addEventListener("DOMContentLoaded", function () {
             });
         }
         
-        // Apply indicator filters with AND condition
         function applyIndicatorFilters() {
             if (Object.keys(activeFiltersByGroup).length === 0) {
                 renderTable(allCompanies);
@@ -270,15 +282,11 @@ document.addEventListener("DOMContentLoaded", function () {
                 return;
             }
             
-            // Filter companies based on indicator signals with AND condition
             const filteredCompanies = allCompanies.filter(company => {
-                // Company must match ALL active filters (AND condition)
                 return Object.values(activeFiltersByGroup).every(filter => {
-                    // For ADX, handle "Strong Trend" and "Weak Trend"
                     if (filter.indicator.toUpperCase() === 'ADX') {
                         return company.signals.ADX === filter.signal;
                     }
-                    // For other indicators
                     const indicatorKey = Object.keys(company.signals).find(
                         key => key.toLowerCase() === filter.indicator.toLowerCase()
                     );
@@ -292,17 +300,14 @@ document.addEventListener("DOMContentLoaded", function () {
         }
     }
     
-    // Update the stocks count display
     function updateStocksCount(count) {
         document.getElementById('stocksCount').textContent = count;
     }
     
     function updateLastUpdatedDate(companies) {
-        // Find the most recent date from the companies (assuming dates are in "YYYY-MM-DD" format)
         const dates = companies.map(company => company.date).filter(date => date);
         const latestDate = new Date(Math.max(...dates.map(date => new Date(date).getTime())));
     
-        // Format the date
         const formattedDate = latestDate.toLocaleDateString('en-US', {
             weekday: 'long', 
             year: 'numeric', 
@@ -310,7 +315,6 @@ document.addEventListener("DOMContentLoaded", function () {
             day: 'numeric'
         });
     
-        // Update the last updated text
         document.getElementById('lastUpdated').textContent = formattedDate;
     }
 
@@ -320,10 +324,8 @@ document.addEventListener("DOMContentLoaded", function () {
     function showPopup(indicator, symbol, signalValue) {
         const url = `/indicator_data/${symbol}/${indicator}`;
         
-        // Get indicator configuration (or use default if not found)
         const config = indicatorConfig[indicator.toLowerCase()] || defaultIndicatorConfig;
         
-        // Set indicator description
         document.getElementById('indicatorDescription').innerText = config.description;
         
         fetch(url)
@@ -337,8 +339,12 @@ document.addEventListener("DOMContentLoaded", function () {
             const labels = data.data.map(d => d.date);
             const values = data.data.map(d => d.value);
             const latestValue = values[values.length - 1];
+
+            const priceMap = {};
+            data.closing_prices.forEach(p => {
+                priceMap[p.date] = p.close;
+            });
             
-            // Destroy previous chart if it exists
             if (chartInstance) {
             chartInstance.destroy();
             }
@@ -346,11 +352,7 @@ document.addEventListener("DOMContentLoaded", function () {
             const ctx = document.getElementById('indicatorChart').getContext('2d');
             const bgColor  = 'rgba(66, 133, 244, 0.3)';
             
-            chartInstance = new Chart(ctx, {
-            type: 'line',
-            data: {
-                labels: labels,
-                datasets: [{
+            const datasets = [{
                 label: `${indicator.toUpperCase()} - ${symbol}`,
                 data: values,
                 borderColor: config.borderColor,
@@ -360,49 +362,149 @@ document.addEventListener("DOMContentLoaded", function () {
                 tension: 0.4,
                 pointRadius: 2,
                 pointHoverRadius: 5
-                }]
-            },
-            options: {
+            }];
+
+            let chartOptions = {
                 responsive: true,
                 maintainAspectRatio: true,
                 plugins: {
-                legend: {
-                    display: true,
-                    position: 'top',
-                }
+                    legend: {
+                        position: 'top',
+                    },
+                    tooltip: {
+                        mode: 'index',
+                        intersect: false
+                    }
                 },
                 scales: {
-                y: {
-                    beginAtZero: false,
-                    grid: {
-                    color: 'rgba(0, 0, 0, 0.05)'
-                    }
-                },
-                x: {
-                    grid: {
-                    display: false
+                    y: {
+                        beginAtZero: false,
+                        grid: {
+                            color: 'rgba(0, 0, 0, 0.05)'
+                        }
+                    },
+                    x: {
+                        grid: {
+                            display: false
+                        }
                     }
                 }
-                }
+            };
+        
+            if (indicator.toLowerCase() === 'sma') {
+                const closingValues = data.closing_prices.map(p => p.close);
+            
+                datasets.push({
+                    label: `Closing Price - ${symbol}`,
+                    data: closingValues,
+                    borderColor: 'rgba(255, 99, 132, 0.8)',
+                    backgroundColor: 'rgba(255, 99, 132, 0.1)',
+                    borderWidth: 2,
+                    fill: false,
+                    tension: 0.4,
+                    pointRadius: 1,
+                    pointHoverRadius: 4
+                });
+            
+                // Single y-axis for SMA, no changes to `options.scales`
             }
+            else if (indicator.toLowerCase() === 'obv') {
+                const obvValues = data.data.map(d => d.value);
+                const closingValues = data.closing_prices.map(p => p.close);
+            
+                datasets.push({
+                    label: 'OBV',
+                    data: obvValues,
+                    borderColor: '#4CAF50',
+                    backgroundColor: 'rgba(76, 175, 80, 0.1)',
+                    tension: 0.1,
+                    fill: true,
+                    yAxisID: 'y',
+                });
+            
+                datasets.push({
+                    label: 'Close Price',
+                    data: closingValues,
+                    borderColor: '#2196F3',
+                    backgroundColor: 'rgba(33, 150, 243, 0.1)',
+                    tension: 0.1,
+                    fill: true,
+                    yAxisID: 'y1',
+                });
+            
+                // Override `options.scales` with dual axes
+                chartOptions.scales = {
+                    y: {
+                        type: 'linear',
+                        position: 'left',
+                        title: {
+                            display: true,
+                            text: 'OBV'
+                        }
+                    },
+                    y1: {
+                        type: 'linear',
+                        position: 'right',
+                        grid: {
+                            drawOnChartArea: false,
+                        },
+                        title: {
+                            display: true,
+                            text: 'Price'
+                        }
+                    },
+                    x: {
+                        title: {
+                            display: true,
+                            text: 'Date'
+                        }
+                    }
+                };
+            }
+            
+        
+            chartInstance = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: datasets
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: true,
+                    plugins: {
+                        legend: {
+                            display: true,
+                            position: 'top',
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: false,
+                            grid: {
+                                color: 'rgba(0, 0, 0, 0.05)'
+                            }
+                        },
+                        x: {
+                            grid: {
+                                display: false
+                            }
+                        }
+                    }
+                }
             });
 
             
-            // Update modal content
             document.getElementById('popupTitle').innerHTML = `${indicator.toUpperCase()} <span class="symbol">(${symbol})</span>`;
             document.getElementById('chartSubtitle').innerText = `${indicator.toUpperCase()} signal for ${symbol}`;
             
-            // Find applicable rule from config
             const rule = config.signalRules.find(rule => rule.condition(signalValue, latestValue));
             
-            // Apply the rule to generate signal and explanation
             const signal = rule.signal;
             const explanation = rule.explanation(latestValue);
             
-            // Update explanation text
             document.getElementById('explanationText').innerText = explanation;
             
-            // Update signal type
             const signalTypeElement = document.getElementById('signalType');
             signalTypeElement.innerText = signal;
             signalTypeElement.className = '';
@@ -415,7 +517,6 @@ document.addEventListener("DOMContentLoaded", function () {
             signalTypeElement.classList.add('signal-type-neutral');
             }
             
-            // Show the modal
             document.getElementById('popupModal').style.display = 'block';
         })
         .catch(err => {
@@ -424,7 +525,6 @@ document.addEventListener("DOMContentLoaded", function () {
         });
     }
     
-    // Close modal
     document.querySelector('.close').onclick = function () {
         document.getElementById('popupModal').style.display = 'none';
     };

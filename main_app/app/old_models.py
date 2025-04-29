@@ -4,7 +4,6 @@ from datetime import datetime
 from flask_login import UserMixin
 from app import db
 
-# Import the calculation methods for taxes from calculations.py
 from .calculations import (
     calculate_broker_commission, calculate_sebon_fee, calculate_capital_gain_tax,
     calculate_total_amount_paid, calculate_total_amount_received
@@ -12,7 +11,6 @@ from .calculations import (
 
 
 
-# Define the model for all the stock prices from 2012 to 2020
 class StockPrices(db.Model, UserMixin):
     __tablename__ = 'stock_prices'
     
@@ -28,7 +26,6 @@ class StockPrices(db.Model, UserMixin):
 
 
 
-# Define the User model
 class User(db.Model):
     __tablename__ = 'user'
 
@@ -38,14 +35,11 @@ class User(db.Model):
     password = db.Column(db.String(120), nullable=False)
     user_type = db.Column(db.String(15), nullable=False)
 
-    # One-to-Many relationship with Stock
     stocks = db.relationship('Stock', backref='user', lazy=True)
-    # One-to-Many relationship with Transaction
     transactions = db.relationship('Transaction', backref='user', lazy=True)
 
 
 
-# Define the Stock model (this connects the stock to the user)
 class Stock(db.Model):
     __tablename__ = 'stock'
 
@@ -57,34 +51,30 @@ class Stock(db.Model):
     quantity = db.Column(db.Integer, nullable=False)
 
 
-
-# Transaction Table
 class Transaction(db.Model):
     __tablename__ = 'transactions'
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     stock_symbol = db.Column(db.String(10), nullable=False)
-    transaction_type = db.Column(db.String(10), nullable=False)  # BUY or SELL
+    transaction_type = db.Column(db.String(10), nullable=False)  
     quantity = db.Column(db.Integer, nullable=False)
     price_per_share = db.Column(db.Numeric(10, 2), nullable=False)
     date = db.Column(db.Date, nullable=False)
-    transaction_amount = db.Column(db.Numeric(10, 2), nullable=False)  # New: Amount before tax
-    broker_commission_rate = db.Column(db.Numeric(5, 3), nullable=False)  # New: Broker commission rate
-    sebon_fee_rate = db.Column(db.Numeric(5, 3), nullable=False)  # New: SEBON fee rate
-    total_amount_paid = db.Column(db.Numeric(10, 2), nullable=True)  # After tax and fees for buys
-    total_amount_received = db.Column(db.Numeric(10, 2), nullable=True)  # After tax and fees for sells
-    profit_or_loss = db.Column(db.Numeric(10, 2), nullable=True)  # Profit or loss when selling stocks
+    transaction_amount = db.Column(db.Numeric(10, 2), nullable=False)  
+    broker_commission_rate = db.Column(db.Numeric(5, 3), nullable=False)  
+    sebon_fee_rate = db.Column(db.Numeric(5, 3), nullable=False)  
+    total_amount_paid = db.Column(db.Numeric(10, 2), nullable=True) 
+    total_amount_received = db.Column(db.Numeric(10, 2), nullable=True)  
+    profit_or_loss = db.Column(db.Numeric(10, 2), nullable=True) 
     capital_gain_tax = db.Column(db.Numeric(10, 2), nullable=False)
     transaction_price = db.Column(db.Numeric(10, 2), nullable=False)
 
-    # One-to-one relationship with Tax
     tax = db.relationship("Tax", backref="transaction", uselist=False)
 
     def __repr__(self):
         return f"Transaction('{self.stock_symbol}', '{self.transaction_type}', '{self.quantity}')"
 
 
-    # Methods to calculate commission, fees, and taxes
     def calculate_broker_commission(self):
         """Calculate broker commission using the helper function."""
         return calculate_broker_commission(self.transaction_amount)
@@ -96,7 +86,6 @@ class Transaction(db.Model):
     def calculate_capital_gain_tax(self):
         """Calculate capital gain tax based on profit/loss, user type, and holding period."""
         
-        # Find the matching BUY transaction for this stock symbol and user
         buy_transaction = Transaction.query.filter_by(
             user_id=self.user_id, 
             stock_symbol=self.stock_symbol, 
@@ -104,10 +93,10 @@ class Transaction(db.Model):
         ).first()
         
         if not buy_transaction:
-            return 0  # If no corresponding BUY transaction, no tax can be calculated
+            return 0  
         
-        purchase_date = buy_transaction.date  # Use the date of the "BUY" transaction as purchase_date
-        sell_date = self.date  # Use the current transaction's date as the sell_date (which is the sell date)
+        purchase_date = buy_transaction.date  
+        sell_date = self.date  
 
         return calculate_capital_gain_tax(
             profit_or_loss=self.profit_or_loss,
@@ -131,7 +120,6 @@ class Transaction(db.Model):
 
 
 
-# Tax Table
 class Tax(db.Model):
     __tablename__ = 'taxes'
     
@@ -140,7 +128,7 @@ class Tax(db.Model):
     broker_commission = db.Column(db.Float, nullable=False)
     sebon_fee = db.Column(db.Float, nullable=False)
     dp_amount = db.Column(db.Float, nullable=False, default=25.00)
-    capital_gain_tax = db.Column(db.Float, nullable=True)  # Null for 'BUY'
+    capital_gain_tax = db.Column(db.Float, nullable=True)  
     
     def __repr__(self):
         return f"Tax('Transaction: {self.transaction_id}', 'Broker Commission: {self.broker_commission}')"

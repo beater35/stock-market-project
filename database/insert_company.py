@@ -2,17 +2,14 @@ import os
 import psycopg2
 from dotenv import load_dotenv
 
-# Load environment variables from the .env file
 dotenv_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', '.env')
 load_dotenv(dotenv_path)
 
-# Database connection parameters
 DB_HOST = os.getenv("DB_HOST")
 DB_NAME = os.getenv("DB_NAME")
 DB_USER = os.getenv("DB_USER")
 DB_PASSWORD = os.getenv("DB_PASSWORD")
 
-# Connect to PostgreSQL
 def create_connection():
     try:
         connection = psycopg2.connect(
@@ -26,7 +23,6 @@ def create_connection():
         print(f"Error: {e}")
         return None
 
-# Insert stock data into the stock table
 def insert_stock_data(stock_data):
     connection = create_connection()
     if connection is None:
@@ -35,7 +31,6 @@ def insert_stock_data(stock_data):
     
     cursor = connection.cursor()
 
-    # Insert or check for stock symbol existence
     try:
         insert_query = '''
         INSERT INTO stock (symbol, name, sector)
@@ -43,9 +38,7 @@ def insert_stock_data(stock_data):
         ON CONFLICT (symbol) DO NOTHING;
         '''
         
-        # Insert stock data
         for stock in stock_data:
-            # Assuming stock_data is a list of tuples: (symbol, name, sector)
             cursor.execute(insert_query, stock)
         
         connection.commit()
@@ -55,11 +48,9 @@ def insert_stock_data(stock_data):
         print(f"Error inserting stock data: {e}")
     
     finally:
-        # Close the cursor and connection
         cursor.close()
         connection.close()
 
-# Manually input company stock data here
 stock_data = [
     ('NMB', 'NMB Bank Limited', 'Commercial Bank'),
     ('SBL', 'Siddhartha Bank Limited', 'Commercial Bank'),
@@ -307,6 +298,5 @@ stock_data = [
     ('STC', 'Salt Trading Corporation', 'Trading')
 ]
 
-# Call the insert function
 if __name__ == "__main__":
     insert_stock_data(stock_data)

@@ -3,17 +3,14 @@ import psycopg2
 import pandas as pd
 from dotenv import load_dotenv
 
-# Load environment variables
 dotenv_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', '.env')
 load_dotenv(dotenv_path)
 
-# Database connection parameters
 DB_HOST = os.getenv("DB_HOST")
 DB_NAME = os.getenv("DB_NAME")
 DB_USER = os.getenv("DB_USER")
 DB_PASSWORD = os.getenv("DB_PASSWORD")
 
-# Function to connect to PostgreSQL
 def create_connection():
     try:
         connection = psycopg2.connect(
@@ -27,7 +24,6 @@ def create_connection():
         print(f"Error: {e}")
         return None
 
-# Function to find duplicates
 def find_duplicates():
     connection = create_connection()
     if connection is None:
@@ -61,6 +57,5 @@ def find_duplicates():
         cursor.close()
         connection.close()
 
-# Run the function
 if __name__ == "__main__":
     find_duplicates()

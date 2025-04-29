@@ -23,6 +23,19 @@ h1 {
   border-bottom: 1px solid #eee;
 }
 
+.header-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 165%;
+  margin-bottom: 15px;
+  box-sizing: border-box;
+}
+
+#downloadCSV {
+  margin-left: auto;
+}
+
 th {
   color: #666;
   font-weight: 500;
@@ -37,11 +50,11 @@ td {
 }
 
 a {
-  color: #0066cc; /* Blue color for the link */
-  text-decoration: none; /* Remove default underline */
-  font-weight: 600; /* Slightly bolder font for better visibility */
-  position: relative; /* For positioning the pseudo-element */
-  padding-bottom: 2px; /* Space for the underline */
+  color: #0066cc;
+  text-decoration: none; 
+  font-weight: 600; 
+  position: relative; 
+  padding-bottom: 2px; 
 }
 
 a::after {
@@ -51,19 +64,18 @@ a::after {
   bottom: 0;
   width: 100%;
   height: 2px;
-  background: linear-gradient(90deg, #0066cc, #34d399); /* Blue to green gradient for underline */
-  transform: scaleX(0); /* Initially scale the underline to 0 */
-  transform-origin: bottom right; /* Start the underline from the right */
-  transition: transform 0.3s ease-out; /* Smooth transition for underline effect */
+  background: linear-gradient(90deg, #0066cc, #34d399); 
+  transform: scaleX(0); 
+  transform-origin: bottom right; 
+  transition: transform 0.3s ease-out; 
 }
 
 a:hover::after {
-  transform: scaleX(1); /* When hovered, expand the underline */
-  transform-origin: bottom left; /* Make the underline expand from the left */
+  transform: scaleX(1); 
+  transform-origin: bottom left; 
 }
 
 
-/* Signal styling */
 .buy {
   background-color: rgba(0, 200, 83, 0.1);
   color: #00c853;
@@ -142,7 +154,6 @@ a:hover::after {
   flex: 1;
 }
 
-/* All Stocks Button */
 .filter-tab {
   padding: 8px 16px;
   margin-right: 10px;
@@ -241,7 +252,6 @@ a:hover::after {
   background-color: #f5f5f5;
 }
 
-/* Active Filters */
 .active-filters {
   display: flex;
   flex-wrap: wrap;
@@ -266,13 +276,11 @@ a:hover::after {
   font-size: 14px;
 }
 
-/* Stocks Count */
 .stocks-count {
   color: #666;
   font-size: 14px;
 }
 
-/* Responsive adjustments */
 @media (max-width: 768px) {
   .filter-container {
     flex-direction: column;
@@ -284,7 +292,6 @@ a:hover::after {
   }
 }
 
-/* Sentiment classes */
 .bullish {
   background-color: rgba(0, 200, 83, 0.1);
   color: #00c853;
@@ -321,7 +328,6 @@ a:hover::after {
   display: inline-block;
 }
 
-/* Details link */
 .details-link {
   color: #0066cc;
   text-decoration: none;
