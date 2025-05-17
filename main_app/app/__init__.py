@@ -53,7 +53,7 @@ def scrape_stock_data():
     with app.app_context():  
         now = datetime.now()
 
-        if now.weekday() in [1, 4, 5]:
+        if now.weekday() in [3, 4, 5]:
             print("Market is closed today. Skipping scraping.")
             return
         

@@ -43,6 +43,15 @@ header {
     padding-left: 23px;
 }
 
+.header-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    margin-bottom: 15px;
+    box-sizing: border-box;
+}
+
 .company-name {
     font-size: 24px;
     font-weight: bold;
@@ -143,6 +152,150 @@ header {
 .price-down {
     color: var(--sell-color);
 }
+
+/* Indicator Signals */
+.technical-indicators {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
+}
+
+.signal-summary {
+    background-color: #f8f9fa;
+    border: 1px solid #e9ecef;
+    border-radius: 6px;
+    padding: 20px;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+}
+
+.signal-icon {
+    font-size: 24px;
+    margin-right: 16px;
+    color: #6c757d;
+}
+
+.signal-title {
+    font-weight: 700;
+    text-transform: uppercase;
+    margin-bottom: 4px;
+    color: #212529;
+}
+
+.signal-description {
+    color: #6c757d;
+}
+
+.indicators-grid {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 16px;
+    margin-bottom: 16px;
+}
+
+@media (max-width: 1200px) {
+    .indicators-grid {
+    grid-template-columns: repeat(3, 1fr);
+    }
+}
+
+@media (max-width: 768px) {
+    .indicators-grid {
+    grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 480px) {
+    .indicators-grid {
+    grid-template-columns: 1fr;
+    }
+}
+
+.indicator-card {
+    border: 1px solid #e9ecef;
+    border-radius: 6px;
+    padding: 16px;
+}
+
+.indicator-headerr {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+}
+
+.indicator-names {
+    font-weight: 600;
+    color: #212529;
+}
+
+.indicator-badge {
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-size: 0.85rem;
+    font-weight: 500;
+    cursor: pointer;
+}
+
+.indicator-badge.bullish {
+    background-color: rgba(75, 210, 143, 0.2);
+    color: #2a9d8f;
+}
+
+.indicator-badge.bearish {
+    background-color: rgba(245, 108, 108, 0.2);
+    color: #e76f51;
+}
+
+.indicator-badge.neutral {
+    background-color: rgba(108, 117, 125, 0.1);
+    color: #6c757d;
+}
+
+.indicator-slider {
+    margin-bottom: 12px;
+}
+
+.slider {
+    appearance: none;
+    -webkit-appearance: none;
+    width: 100%;
+    height: 6px;
+    border-radius: 3px;
+    background: #e9ecef;
+    outline: none;
+}
+
+.slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: #3366cc;
+    cursor: pointer;
+}
+
+.slider::-moz-range-thumb {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: #3366cc;
+    cursor: pointer;
+}
+
+.indicator-weight {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.875rem;
+    color: #6c757d;
+}
+
+.indicators-instruction {
+    text-align: center;
+    color: #6c757d;
+    font-size: 0.875rem;
+}
+/* End */
 
 .chart-container {
     width: 100%;

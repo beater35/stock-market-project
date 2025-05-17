@@ -1,6 +1,25 @@
 document.addEventListener("DOMContentLoaded", () => {
+    let signalRSI;
+    let signalSMA;
+    let signalOBV;
+    let signalADX;
+    let signalMOMENTUM;
+
     const pathParts = window.location.pathname.split('/');
     const symbol = pathParts[pathParts.length - 1];
+    const exportBtn = document.querySelector(".export-btn");
+
+    exportBtn.addEventListener("click", function () {
+        const element = document.getElementById("pdfContent");
+        const opt = {
+            margin:       0.5,
+            filename:     'stock_signals.pdf',
+            image:        { type: 'jpeg', quality: 0.98 },
+            html2canvas:  { scale: 2 },
+            jsPDF:        { unit: 'in', format: 'letter', orientation: 'portrait' }
+        };
+        html2pdf().from(element).set(opt).save();
+    });
 
     fetch(`/api/company/${symbol}/data`)
         .then(response => {
@@ -202,14 +221,17 @@ document.addEventListener("DOMContentLoaded", () => {
 
             const rsiBadge = document.getElementById('rsi-badge');
             if (rsiSignal === "Buy") {
-                rsiBadge.textContent = "Buy";
+                rsiBadge.textContent = "Bullish";
                 rsiBadge.className = "signal-badge signal-buy";
-            } else if (lastRSI === "Sell") {
+                signalRSI = { label: "bullish", value: 1 };
+            } else if (lastRSI === "Bearish") {
                 rsiBadge.textContent = "Sell";
                 rsiBadge.className = "signal-badge signal-sell";
+                signalRSI = { label: "bearish", value: -1 };
             } else {
-                rsiBadge.textContent = "Hold";
+                rsiBadge.textContent = "Neutral";
                 rsiBadge.className = "signal-badge signal-hold";
+                signalRSI = { label: "neutral", value: 0 };
             }
 
             const rsiLabels = stockData.map(data => data.date); 
@@ -305,14 +327,17 @@ document.addEventListener("DOMContentLoaded", () => {
 
             const smaBadge = document.getElementById('sma-badge');
             if (smaSignal === "Buy") {
-                smaBadge.textContent = "Buy";
+                smaBadge.textContent = "Bullish";
                 smaBadge.className = "signal-badge signal-buy";
+                signalSMA = { label: "bullish", value: 1 };
             } else if (smaSignal === "Sell") {
-                smaBadge.textContent = "Sell";
+                smaBadge.textContent = "Bearish";
                 smaBadge.className = "signal-badge signal-sell";
+                signalSMA = { label: "bearish", value: -1 };
             } else {
-                smaBadge.textContent = "Hold";
+                smaBadge.textContent = "Neutral";
                 smaBadge.className = "signal-badge signal-hold";
+                signalSMA = { label: "neutral", value: 0 };
             }
 
             const smaLabels = stockData.map(data => data.date); 
@@ -412,14 +437,17 @@ document.addEventListener("DOMContentLoaded", () => {
 
             const obvBadge = document.getElementById('obv-badge');
             if (obvSignal === "Buy") {
-                obvBadge.textContent = "Buy";
+                obvBadge.textContent = "Bullish";
                 obvBadge.className = "signal-badge signal-buy";
-            } else if (obvSignal === "Sell") {
+                signalOBV = { label: "bullish", value: 1 };
+            } else if (obvSignal === "Bearish") {
                 obvBadge.textContent = "Sell";
                 obvBadge.className = "signal-badge signal-sell";
+                signalOBV = { label: "bearish", value: -1 };
             } else {
-                obvBadge.textContent = "Hold";
+                obvBadge.textContent = "Neutral";
                 obvBadge.className = "signal-badge signal-hold";
+                signalOBV = { label: "neutral", value: 0 };
             }
 
             const obvLabels = stockData.map(data => data.date);
@@ -523,12 +551,18 @@ document.addEventListener("DOMContentLoaded", () => {
             if (adxSignal === "Strong Trend") {
                 adxBadge.textContent = "Strong Trend";
                 adxBadge.className = "signal-badge signal-buy";
+                signalADX = {
+                    label: lastRSI > 50 ? "bullish" : "bearish",
+                    value: lastRSI > 50 ? 1 : -1
+                };
             } else if (adxSignal === "Weak Trend") {
                 adxBadge.textContent = "Weak Trend";
                 adxBadge.className = "signal-badge signal-sell";
+                signalADX = { label: "neutral", value: 0 };
             } else {
                 adxBadge.textContent = "Hold";
                 adxBadge.className = "signal-badge signal-hold";
+                signalADX = { label: "neutral", value: 0 };
             }
 
             const adxLabels = stockData.map(data => data.date);  
@@ -617,14 +651,17 @@ document.addEventListener("DOMContentLoaded", () => {
 
             const momentumBadge = document.getElementById('momentum-badge');
             if (momentumSignal === "Buy") {
-                momentumBadge.textContent = "Buy";
+                momentumBadge.textContent = "Bullish";
                 momentumBadge.className = "signal-badge signal-buy";
-            } else if (momentumSignal === "Sell") {
+                signalMOMENTUM = { label: "bullish", value: 1 };
+            } else if (momentumSignal === "Bearish") {
                 momentumBadge.textContent = "Sell";
                 momentumBadge.className = "signal-badge signal-sell";
+                signalMOMENTUM = { label: "bearish", value: -1 };
             } else {
-                momentumBadge.textContent = "Hold";
+                momentumBadge.textContent = "Neutral";
                 momentumBadge.className = "signal-badge signal-hold";
+                signalMOMENTUM = { label: "neutral", value: 0 };
             }
 
             const momentumLabels = stockData.map(data => data.date); 
@@ -686,8 +723,120 @@ document.addEventListener("DOMContentLoaded", () => {
                 }
             });
 
+            let signals = {
+                rsi: { ...signalRSI, weight: 20 },
+                sma: { ...signalSMA, weight: 20 },
+                obv: { ...signalOBV, weight: 20 },
+                adx: { ...signalADX, weight: 20 },
+                momentum: { ...signalMOMENTUM, weight: 20 }
+            };
 
+            const indicators = ['rsi', 'sma', 'obv', 'adx', 'momentum'];
 
+            indicators.forEach(indicator => {
+            const badgeElement = document.getElementById(`${indicator}-signal`);
+            
+            if (badgeElement && signals[indicator]) {
+                const signal = signals[indicator];
+                let arrowSymbol = '';
+                
+                if (signal.label === 'bullish') {
+                arrowSymbol = '↑';
+                } else if (signal.label === 'bearish') {
+                arrowSymbol = '↓';
+                } else {
+                arrowSymbol = '→'; 
+                }
+                
+                badgeElement.textContent = `${arrowSymbol} ${signal.label}`;
+                badgeElement.className = `indicator-badge ${signal.label}`;
+            }
+            });
+            
+            function updateSummarySignal() {
+                const result = calculateFinalSignal(signals);
+            
+                const signalIcon = document.querySelector(".signal-icon");
+                const signalTitle = document.querySelector(".signal-title");
+                const signalDescription = document.querySelector(".signal-description");
+            
+                // Update icon and color based on signal
+                if (result.label === "bullish") {
+                    signalIcon.textContent = "↑";
+                    signalIcon.style.color = "green";
+                    signalTitle.style.color = "green";
+                } else if (result.label === "bearish") {
+                    signalIcon.textContent = "↓";
+                    signalIcon.style.color = "red";
+                    signalTitle.style.color = "red";
+                } else {
+                    signalIcon.textContent = "—";
+                    signalIcon.style.color = "gray";
+                    signalTitle.style.color = "gray";
+                }
+            
+                // Update text content
+                signalTitle.textContent = result.title;
+                signalDescription.textContent = result.description;
+            }
+            
+            
+            function calculateFinalSignal(signals) {
+                let totalWeight = 0;
+                let bullishWeight = 0;
+                let bearishWeight = 0;
+                let neutralWeight = 0;
+            
+                for (let key in signals) {
+                    const signal = signals[key];
+                    const weight = signal.weight || 0;
+                    totalWeight += weight;
+            
+                    if (signal.label === "bullish") bullishWeight += weight;
+                    else if (signal.label === "bearish") bearishWeight += weight;
+                    else neutralWeight += weight;
+                }
+            
+                if (totalWeight === 0) {
+                    return { label: "neutral", title: "NEUTRAL SIGNAL", description: "No valid data to determine sentiment." };
+                }
+            
+                const bullishPct = bullishWeight / totalWeight;
+                const bearishPct = bearishWeight / totalWeight;
+            
+                if (bullishPct > 0.6) {
+                    return { label: "bullish", title: "BULLISH SIGNAL", description: "Market sentiment is leaning bullish." };
+                } else if (bearishPct > 0.6) {
+                    return { label: "bearish", title: "BEARISH SIGNAL", description: "Market sentiment is leaning bearish." };
+                } else {
+                    return { label: "neutral", title: "NEUTRAL SIGNAL", description: "The overall market sentiment is undecided." };
+                }
+            }
+            
+            
+            document.querySelectorAll(".slider").forEach(slider => {
+                slider.addEventListener("input", function () {
+                    const card = this.closest(".indicator-card");
+                    const indicatorName = card.dataset.indicator;
+                    const newWeight = parseInt(this.value);
+            
+                    console.log("Slider moved:", indicatorName, "New weight:", newWeight);
+            
+                    const weightDisplay = card.querySelector(".indicator-weight span:last-child");
+                    weightDisplay.textContent = `${newWeight}%`;
+            
+                    if (signals[indicatorName]) {
+                        signals[indicatorName].weight = newWeight;
+                    } else {
+                        console.warn("Indicator not found in signals:", indicatorName); 
+                    }
+            
+                    updateSummarySignal();
+                });
+            });
+
+            updateSummarySignal();
+            
             
         })
         .catch(error => console.error("Failed to load company data:", error));

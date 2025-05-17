@@ -105,13 +105,13 @@ document.addEventListener("DOMContentLoaded", function () {
                 } else {
                     if (signal === "Buy") {
                         signalSpan.classList.add("buy");
-                        signalSpan.textContent = "Buy";
+                        signalSpan.textContent = "Bullish";
                     } else if (signal === "Sell") {
                         signalSpan.classList.add("sell");
-                        signalSpan.textContent = "Sell";
+                        signalSpan.textContent = "Bearish";
                     } else if (signal === "Hold") {
                         signalSpan.classList.add("hold");
-                        signalSpan.textContent = "Hold";
+                        signalSpan.textContent = "Neutral";
                     } else {
                         signalSpan.textContent = signal;
                     }
@@ -406,7 +406,6 @@ document.addEventListener("DOMContentLoaded", function () {
                     pointHoverRadius: 4
                 });
             
-                // Single y-axis for SMA, no changes to `options.scales`
             }
             else if (indicator.toLowerCase() === 'obv') {
                 const obvValues = data.data.map(d => d.value);
@@ -432,7 +431,6 @@ document.addEventListener("DOMContentLoaded", function () {
                     yAxisID: 'y1',
                 });
             
-                // Override `options.scales` with dual axes
                 chartOptions.scales = {
                     y: {
                         type: 'linear',
@@ -510,11 +508,18 @@ document.addEventListener("DOMContentLoaded", function () {
             signalTypeElement.className = '';
             
             if (signal.toLowerCase() === 'buy') {
-            signalTypeElement.classList.add('signal-type-buy');
+                signalTypeElement.classList.add('signal-type-buy');
+                signalTypeElement.innerText = "Bullish";
             } else if (signal.toLowerCase() === 'sell') {
-            signalTypeElement.classList.add('signal-type-sell');
+                signalTypeElement.classList.add('signal-type-sell');
+                signalTypeElement.innerText = "Bearish";
             } else {
-            signalTypeElement.classList.add('signal-type-neutral');
+                signalTypeElement.classList.add('signal-type-neutral');
+                if (indicator.toLowerCase() === 'adx') {
+                    signalTypeElement.innerText = signal;
+                } else {
+                    signalTypeElement.innerText = "Neutral";
+                }
             }
             
             document.getElementById('popupModal').style.display = 'block';
