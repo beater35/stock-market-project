@@ -67,7 +67,9 @@ document.addEventListener("DOMContentLoaded", function () {
     const cachedTime = localStorage.getItem(apiEndpoint + "_time");
 
     const now = new Date();
-    const isAfter3PM = now.getHours() >= 15;
+    const hours = now.getHours();
+    const minutes = now.getMinutes();
+    const isAfter3PM = hours > 15 || (hours === 15 && minutes >= 15);
 
     if (cached && cachedTime) {
         const cacheDate = new Date(cachedTime);
