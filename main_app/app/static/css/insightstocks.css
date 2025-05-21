@@ -47,21 +47,21 @@ body {
 
 .hero-image {
   flex: 1;
-  background-color: white;
-  border-radius: 15px;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
   padding: 30px;
   display: flex;
   justify-content: center;
   align-items: center;
-  height: 250px;
+  height: 366px;
 }
 
-.hero-image .chart {
-  display: flex;
-  align-items: flex-end;
-  height: 100%;
+.hero-image img {
+  max-width: 110%;
+  max-height: 110%; 
+  object-fit: contain;
+  width: 100%; 
+  height: auto; 
 }
+
 
 .chart-bar {
   width: 20px;

@@ -5,13 +5,13 @@ const indicatorConfig = {
     chartBgColor: 'rgba(66, 133, 244, 0.1)',
     signalRules: [
         {
-            condition: (signalValue) => signalValue === 'Buy',
+            condition: (signalValue) => signalValue === 'Sell',
             signal: 'Sell',
             borderColor: '#81C784',
             explanation: value => `The RSI is trending upward and currently at ${value.toFixed(2)}, suggesting the asset may be overbought.`
         },
         {
-            condition: (signalValue) => signalValue === 'Sell',
+            condition: (signalValue) => signalValue === 'Buy',
             signal: 'Buy',
             borderColor: '#EF5350',
             explanation: value => `The RSI is trending downward and currently at ${value.toFixed(2)}, suggesting the asset may be oversold.`

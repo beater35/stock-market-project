@@ -1,9 +1,9 @@
 import os
 import pandas as pd
 
-directory = "/home/beater35/VS code/FYP/csv files/nepsealpha_stock_data_2020-03-23_2025-03-10"
+directory = "/home/beater35/VS code/FYP/csv files/nepsealpha_stock_data_2025-01-01_2025-05-21"
 
-output_file = "merged_data.csv"
+output_file = "merged_data25.csv"
 
 chunk_size = 100000  
 

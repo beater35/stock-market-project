@@ -40,19 +40,65 @@ document.addEventListener("DOMContentLoaded", function () {
     
     const cachedData = sessionStorage.getItem(apiEndpoint);
 
-    if (cachedData) {
-        const companies = JSON.parse(cachedData);
-        allCompanies = companies;
-        allCompanies.sort((a, b) => a.symbol.localeCompare(b.symbol));
-        renderTable(allCompanies);
-        setupFilters();
-        updateStocksCount(allCompanies.length);
-        updateLastUpdatedDate(allCompanies);
+    // if (cachedData) {
+    //     const companies = JSON.parse(cachedData);
+    //     allCompanies = companies;
+    //     allCompanies.sort((a, b) => a.symbol.localeCompare(b.symbol));
+    //     renderTable(allCompanies);
+    //     setupFilters();
+    //     updateStocksCount(allCompanies.length);
+    //     updateLastUpdatedDate(allCompanies);
+    // } else {
+    //     fetch(apiEndpoint)
+    //         .then(response => response.json())
+    //         .then(companies => {
+    //             sessionStorage.setItem(apiEndpoint, JSON.stringify(companies)); // cache the data
+    //             allCompanies = companies;
+    //             allCompanies.sort((a, b) => a.symbol.localeCompare(b.symbol));
+    //             renderTable(allCompanies);
+    //             setupFilters();
+    //             updateStocksCount(allCompanies.length);
+    //             updateLastUpdatedDate(allCompanies);
+    //         })
+    //         .catch(error => console.error("Error loading data:", error));
+    // }
+
+    const cached = localStorage.getItem(apiEndpoint);
+    const cachedTime = localStorage.getItem(apiEndpoint + "_time");
+
+    const now = new Date();
+    const isAfter3PM = now.getHours() >= 15;
+
+    if (cached && cachedTime) {
+        const cacheDate = new Date(cachedTime);
+
+        const isSameDay = now.toDateString() === cacheDate.toDateString();
+
+        // If it's the same day, use cache
+        // If it's a new day and before 3 PM, still use yesterday's data
+        // If it's a new day and after 3 PM, refetch
+        if (isSameDay || (!isSameDay && !isAfter3PM)) {
+            const companies = JSON.parse(cached);
+            allCompanies = companies;
+            allCompanies.sort((a, b) => a.symbol.localeCompare(b.symbol));
+            renderTable(allCompanies);
+            setupFilters();
+            updateStocksCount(allCompanies.length);
+            updateLastUpdatedDate(allCompanies);
+        } else {
+            fetchAndCache(); // New day + after 3 PM → fetch new data
+        }
     } else {
+        fetchAndCache(); // No cache → fetch
+    }
+
+    function fetchAndCache() {
         fetch(apiEndpoint)
             .then(response => response.json())
             .then(companies => {
-                sessionStorage.setItem(apiEndpoint, JSON.stringify(companies)); // cache the data
+                localStorage.setItem(apiEndpoint, JSON.stringify(companies));
+                localStorage.setItem(apiEndpoint + "_time", new Date().toISOString());
+
                 allCompanies = companies;
                 allCompanies.sort((a, b) => a.symbol.localeCompare(b.symbol));
                 renderTable(allCompanies);
@@ -62,6 +108,7 @@ document.addEventListener("DOMContentLoaded", function () {
             })
             .catch(error => console.error("Error loading data:", error));
     }
+
     
     function renderTable(companies) {
         const tableBody = document.querySelector("#indicatorsTable tbody");
@@ -226,7 +273,14 @@ document.addEventListener("DOMContentLoaded", function () {
         indicatorFilters.forEach(option => {
             option.addEventListener('click', function() {
                 const filter = this.dataset.filter;
-                const filterName = this.innerText;
+                const textToSignal = {
+                    'Bullish': 'Buy',
+                    'Bearish': 'Sell',
+                    'Neutral': 'Hold',
+                    'Strong Trend': 'Strong Trend',
+                    'Weak Trend': 'Weak Trend'
+                };
+                const filterName = textToSignal[this.innerText] || this.innerText;
                 const filterGroup = this.closest('.dropdown-section').querySelector('.dropdown-header').innerText;
                 
                 filterTabs.forEach(tab => tab.classList.remove('active'));
@@ -246,7 +300,7 @@ document.addEventListener("DOMContentLoaded", function () {
                     signal: filterName
                 };
                 
-                createActiveFilterTag(filter, `${filterGroup}: ${filterName}`, filterGroup);
+                createActiveFilterTag(filter, `${filterGroup}: ${this.innerText}`, filterGroup);
                 
                 applyIndicatorFilters();
             });
@@ -324,7 +378,7 @@ document.addEventListener("DOMContentLoaded", function () {
     function showPopup(indicator, symbol, signalValue) {
         const url = `/indicator_data/${symbol}/${indicator}`;
         
-        const config = indicatorConfig[indicator.toLowerCase()] || defaultIndicatorConfig;
+        const config = indicatorConfig[indicator.toLowerCase()];
         
         document.getElementById('indicatorDescription').innerText = config.description;
         
@@ -335,9 +389,10 @@ document.addEventListener("DOMContentLoaded", function () {
             alert(data.error);
             return;
             }
+            const sortedData = data.data.sort((a, b) => new Date(a.date) - new Date(b.date));
             
-            const labels = data.data.map(d => d.date);
-            const values = data.data.map(d => d.value);
+            const labels = sortedData.map(d => d.date);
+            const values = sortedData.map(d => d.value);
             const latestValue = values[values.length - 1];
 
             const priceMap = {};

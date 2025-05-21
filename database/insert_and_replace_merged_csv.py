@@ -43,7 +43,12 @@ def insert_historical_data_from_csv(csv_file_path):
     insert_query = '''
         INSERT INTO stock_price (stock_symbol, date, open_price, high, low, close_price, volume)
         VALUES (%s, %s, %s, %s, %s, %s, %s)
-        ON CONFLICT DO NOTHING;
+        ON CONFLICT (stock_symbol, date) DO UPDATE SET
+            open_price = EXCLUDED.open_price,
+            high = EXCLUDED.high,
+            low = EXCLUDED.low,
+            close_price = EXCLUDED.close_price,
+            volume = EXCLUDED.volume;
     '''
 
     try:

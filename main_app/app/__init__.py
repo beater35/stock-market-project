@@ -53,7 +53,7 @@ def scrape_stock_data():
     with app.app_context():  
         now = datetime.now()
 
-        if now.weekday() in [3, 4, 5]:
+        if now.weekday() in [4, 5]:
             print("Market is closed today. Skipping scraping.")
             return
         
@@ -95,7 +95,3 @@ start_scheduler()
 
 
 
-
-
-if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=5000)

@@ -203,6 +203,7 @@ def company_data_api(symbol):
         obv_signal = "Buy" if (obv_rising and price_rising) else (
             "Sell" if (not obv_rising and not price_rising) else "Hold"
         )
+        print(obv_signal)
 
         signals = {
             "RSI": "Buy" if latest_indicator.rsi < 30 else "Sell" if latest_indicator.rsi > 70 else "Hold",
@@ -211,6 +212,7 @@ def company_data_api(symbol):
             "SMA": "Buy" if latest_indicator.sma < current_price else "Sell",
             "OBV": obv_signal
         }
+
 
     company_data = {
         'company_name': company.name if company else 'Unknown',
@@ -231,12 +233,13 @@ def company_data_api(symbol):
 @app.route('/indicator_data/<string:symbol>/<string:indicator>', methods=['GET'])
 def get_indicator_data(symbol, indicator):
     allowed_indicators = ['rsi', 'sma', 'obv', 'adx', 'momentum']
+    indicator = indicator.lower()
     if indicator not in allowed_indicators:
         return jsonify({'error': 'Invalid indicator'}), 400
 
     try:
         today = datetime.today().date()
-        start_date = today - timedelta(days=25)
+        start_date = today - timedelta(days=39)
 
         indicator_results = db.session.query(
             IndicatorValues.date,
@@ -244,7 +247,7 @@ def get_indicator_data(symbol, indicator):
         ).filter(
             IndicatorValues.stock_symbol == symbol,
             IndicatorValues.date >= start_date
-        ).order_by(IndicatorValues.date).limit(14).all()
+        ).order_by(IndicatorValues.date.desc()).limit(14).all()
 
         indicator_data = [{
             'date': r.date.strftime('%Y-%m-%d'),
@@ -264,7 +267,7 @@ def get_indicator_data(symbol, indicator):
             'close': r.close_price
         } for r in price_results]
 
-        latest_value = indicator_data[-1]['value'] if indicator_data else None
+        latest_value = indicator_data[0]['value'] if indicator_data else None
 
         return jsonify({
             'symbol': symbol,

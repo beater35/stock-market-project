@@ -309,6 +309,7 @@ document.addEventListener("DOMContentLoaded", () => {
             const smaConfig = indicatorConfigure['sma'];
             
             document.getElementById('indicator-description-sma').textContent = smaConfig.description;
+            document.getElementById('indicator-value-sma').textContent = lastSMA.toFixed(1);            
                         
             let smaExplanation = "";
             for (let rule of smaConfig.signalRules) {
@@ -355,7 +356,7 @@ document.addEventListener("DOMContentLoaded", () => {
                             data: priceValues,
                             borderColor: '#1E88E5',
                             backgroundColor: 'rgba(30, 136, 229, 0.1)',
-                            tension: 0,
+                            tension: 0.3,
                             fill: true,
                             pointRadius: 2
                         },
@@ -364,7 +365,7 @@ document.addEventListener("DOMContentLoaded", () => {
                             data: smaValues,
                             borderColor: '#43A047',
                             backgroundColor: 'rgba(67, 160, 71, 0.1)',
-                            tension: 0,
+                            tension: 0.3,
                             fill: false,
                             pointRadius: 2
                         }
@@ -402,7 +403,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
             // OBV
             const lastOBV = lastIndicator.obv;
-            const obvSignal = latestSignals.SMA;
+            const obvSignal = latestSignals.OBV;
             
             const obvConfig = indicatorConfigure['obv'];
             
@@ -440,8 +441,8 @@ document.addEventListener("DOMContentLoaded", () => {
                 obvBadge.textContent = "Bullish";
                 obvBadge.className = "signal-badge signal-buy";
                 signalOBV = { label: "bullish", value: 1 };
-            } else if (obvSignal === "Bearish") {
-                obvBadge.textContent = "Sell";
+            } else if (obvSignal === "Sell") {
+                obvBadge.textContent = "Bearish";
                 obvBadge.className = "signal-badge signal-sell";
                 signalOBV = { label: "bearish", value: -1 };
             } else {
@@ -465,7 +466,7 @@ document.addEventListener("DOMContentLoaded", () => {
                             data: obvValues,
                             borderColor: '#4CAF50',
                             backgroundColor: 'rgba(76, 175, 80, 0.1)',
-                            tension: 0.1,
+                            tension: 0,
                             fill: true,
                             yAxisID: 'y',
                         },
@@ -474,7 +475,7 @@ document.addEventListener("DOMContentLoaded", () => {
                             data: closePrices,
                             borderColor: '#2196F3',
                             backgroundColor: 'rgba(33, 150, 243, 0.1)',
-                            tension: 0.1,
+                            tension: 0,
                             fill: true,
                             yAxisID: 'y1',
                         }
@@ -627,7 +628,7 @@ document.addEventListener("DOMContentLoaded", () => {
             // Momentum
             const lastMomentum = lastIndicator.momentum;
             const momentumSignal = latestSignals.Momentum;
-            
+
             const momentumConfig = indicatorConfigure['momentum'];
             
             document.getElementById('indicator-description-momentum').textContent = momentumConfig.description;
@@ -654,8 +655,8 @@ document.addEventListener("DOMContentLoaded", () => {
                 momentumBadge.textContent = "Bullish";
                 momentumBadge.className = "signal-badge signal-buy";
                 signalMOMENTUM = { label: "bullish", value: 1 };
-            } else if (momentumSignal === "Bearish") {
-                momentumBadge.textContent = "Sell";
+            } else if (momentumSignal === "Sell") {
+                momentumBadge.textContent = "Bearish";
                 momentumBadge.className = "signal-badge signal-sell";
                 signalMOMENTUM = { label: "bearish", value: -1 };
             } else {
