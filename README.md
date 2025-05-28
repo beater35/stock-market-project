@@ -19,7 +19,6 @@ A real-time, web-based platform that helps traders and investors make data-drive
   - Table showing bullish/bearish indicator values
   - Company-specific technical insights
   - Interactive chart view with price and indicator overlays
-- Automatically deletes older data (older than 10–30 days) to save space
 - Scheduled backend processes for scraping and indicator calculation
 
 ---
